@@ -1,0 +1,12 @@
+{
+	"extends": "@tsconfig/node24/tsconfig.json",
+	"compilerOptions": {
+		"outDir": "dist",
+		"baseUrl": "src",
+		"paths": {
+			"@/*": ["*"]
+		}
+	},
+	"include": ["src/**/*", "seeds"],
+	"exclude": ["node_modules", "dist", "migrations"]
+}
