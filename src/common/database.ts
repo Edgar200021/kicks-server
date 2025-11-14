@@ -1,7 +1,7 @@
-import { Kysely, PostgresDialect, sql } from "kysely";
+import { CamelCasePlugin, Kysely, PostgresDialect, sql } from "kysely";
 import { Pool } from "pg";
+import type { DB } from "@/common/types/db.js";
 import type { DatabaseConfig } from "@/config/database.config.js";
-import type { DB } from "@/types/db.js";
 
 export const setupDatabase = async (
 	config: DatabaseConfig,
@@ -19,6 +19,7 @@ export const setupDatabase = async (
 
 	const db = new Kysely<DB>({
 		dialect,
+		plugins: [new CamelCasePlugin()],
 	});
 
 	await sql`SELECT 1`.execute(db);

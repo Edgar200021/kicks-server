@@ -17,6 +17,7 @@ const applicationConfigSchema = z.object({
 	clientAccountVerificationPath: z.string().trim().nonempty(),
 	clientResetPasswordPath: z.string().trim().nonempty(),
 	verificationTokenTTLMinutes: z.coerce.number().min(60).max(1440),
+	sessionTTLMinutes: z.coerce.number().min(1440).max(43800),
 });
 
 const configSchema = z.object({
@@ -41,6 +42,7 @@ export const setupConfig = (): Config => {
 			clientResetPasswordPath:
 				process.env.APPLICATION_CLIENT_RESET_PASSWORD_PATH,
 			verificationTokenTTLMinutes: process.env.VERIFICATION_TOKEN_TTL_MINUTES,
+			sessionTTLMinutes: process.env.SESSION_TTL_MINUTES,
 		},
 		logger: {
 			level: process.env.LOG_LEVEL,
@@ -71,6 +73,10 @@ export const setupConfig = (): Config => {
 		},
 		rateLimit: {
 			globalLimit: process.env.RATE_LIMIT_GLOBAL,
+			notFoundLimit: process.env.RATE_LIMIT_NOT_FOUND,
+			signUpLimit: process.env.RATE_LIMIT_SIGN_UP,
+			signInLimit: process.env.RATE_LIMIT_SIGN_IN,
+			accountVerificationLimit: process.env.RATE_LIMIT_ACCOUNT_VERIFICATION,
 		},
 	});
 };

@@ -9,6 +9,11 @@ export async function up(db: Kysely<any>): Promise<void> {
 		.execute();
 
 	await db.schema
+		.createType("user_gender")
+		.asEnum(["male", "female", "other"])
+		.execute();
+
+	await db.schema
 		.createTable("users")
 		.addColumn("id", "uuid", (col) =>
 			col.primaryKey().defaultTo(sql`gen_random_uuid()`),
@@ -23,7 +28,7 @@ export async function up(db: Kysely<any>): Promise<void> {
 		.addColumn("password", "text")
 		.addColumn("first_name", "text")
 		.addColumn("last_name", "text")
-		.addColumn("gender", "text")
+		.addColumn("gender", sql`user_gender`)
 		.addColumn("role", sql`user_role`, (col) =>
 			col.notNull().defaultTo("regular"),
 		)

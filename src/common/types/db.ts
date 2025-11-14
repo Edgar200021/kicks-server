@@ -5,6 +5,12 @@
 
 import type { ColumnType } from "kysely";
 
+export enum UserGender {
+  Female = "female",
+  Male = "male",
+  Other = "other",
+}
+
 export enum UserRole {
   Admin = "admin",
   Regular = "regular",
@@ -21,7 +27,7 @@ export interface Users {
   email: string;
   facebookId: string | null;
   firstName: string | null;
-  gender: string | null;
+  gender: UserGender | null;
   googleId: string | null;
   id: Generated<string>;
   isBanned: Generated<boolean>;

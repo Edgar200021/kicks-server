@@ -15,7 +15,7 @@ export default fp(async (fastify) => {
 
 		if (hasZodFastifySchemaValidationErrors(err)) {
 			return reply.code(400).send({
-				status: "error",
+				statusCode: 400,
 				errors: (
 					err.validation as { instancePath: string; message: string }[]
 				).reduce((acc: Record<string, string>, err) => {
@@ -43,8 +43,9 @@ export default fp(async (fastify) => {
 				},
 				"Response serialization error",
 			);
+
 			return reply.code(500).send({
-				status: "error",
+				statusCode: 500,
 				error: "Response doesn't match the schema",
 			});
 		}
@@ -52,7 +53,7 @@ export default fp(async (fastify) => {
 		if (err instanceof fastify.httpErrors.HttpError) {
 			return reply
 				.status(err.statusCode)
-				.send({ status: "error", error: err.message });
+				.send({ statusCode: err.statusCode, error: err.message });
 		}
 
 		fastify.log.error(
@@ -68,6 +69,6 @@ export default fp(async (fastify) => {
 			"Unhandled error occurred",
 		);
 
-		reply.status(500).send({ status: "error", error: "Internal Server Error" });
+		reply.status(500).send({ statusCode: 500, error: "Internal Server Error" });
 	});
 });

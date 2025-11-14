@@ -67,7 +67,7 @@ const loggerOptions = (
 	};
 };
 
-export async function buildApp(config: Config) {
+export const buildApp = async (config: Config) => {
 	const app = fastify({
 		logger: loggerOptions(config.logger),
 		genReqId: () => randomUUID().toString(),
@@ -121,4 +121,4 @@ export async function buildApp(config: Config) {
 	await app.ready();
 
 	return app;
-}
+};
