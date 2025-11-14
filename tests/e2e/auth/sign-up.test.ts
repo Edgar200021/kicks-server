@@ -39,10 +39,12 @@ describe("Authentication", () => {
 
 				const dbUser = await app.db
 					.selectFrom("users")
+					.selectAll()
 					.where("email", "=", signUpData.email)
 					.executeTakeFirst();
 
 				expect(dbUser).toBeDefined();
+				expect(dbUser?.password).not.equal(signUpData.password);
 			});
 		});
 
@@ -63,6 +65,7 @@ describe("Authentication", () => {
 		it("Should return 400 status code when request data is invalid", async () => {
 			await withTestApp(async (app) => {
 				const testCases = [
+					{ name: "empty body", data: {} },
 					{
 						name: "missing email",
 						data: omit(signUpData, "email"),

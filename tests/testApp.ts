@@ -1,11 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { RedisContainer } from "@testcontainers/redis";
-import client from "prom-client";
-import { Headers, request } from "undici";
+import Redis from "ioredis";
+import { BodyMixin, Headers, request } from "undici";
+import { expect } from "vitest";
 import { buildApp } from "../src/app";
+import { VERIFICATION_PREFIX } from "../src/common/const/redis";
 import { deepFreeze } from "../src/common/utils/utils";
 import { setupConfig } from "../src/config/config";
-import { rateLimitConfigSchema } from "../src/config/rate-limit.config";
 import { setupTestDb } from "./setupTestDb";
 
 export type TestApp = Awaited<ReturnType<typeof createTestApp>>;
@@ -45,6 +46,11 @@ const createTestApp = async () => {
 	deepFreeze(config);
 
 	const { removeDb, db } = await setupTestDb(config.database);
+	const redis = new Redis({
+		host: config.redis.host,
+		port: config.redis.port,
+		password: config.redis.password,
+	});
 	const app = await buildApp(config);
 
 	const address = await app.listen({ port: 0, host: "127.0.0.1" });
@@ -57,6 +63,14 @@ const createTestApp = async () => {
 		},
 		db,
 		rateLimitConfig: config.rateLimit,
+
+		async getVerificationToken() {
+			return (await redis.keys("*"))
+				.filter((key) => key.startsWith(VERIFICATION_PREFIX))
+				.at(-1)
+				?.split(VERIFICATION_PREFIX)
+				.at(-1);
+		},
 
 		async signUp(body?: unknown) {
 			return request(`${address}/api/v1/auth/sign-up`, {
@@ -78,6 +92,22 @@ const createTestApp = async () => {
 			return request(`${address}/api/v1/auth/verify-account`, {
 				method: "POST",
 				body,
+				headers: new Headers({ "Content-Type": "application/json" }),
+			});
+		},
+
+		async createAndVerify(body?: unknown) {
+			const response = await this.signUp(body);
+			if (response.statusCode !== 201) {
+				throw new Error("Failed to signup");
+			}
+
+			const token = await this.getVerificationToken();
+			return request(`${address}/api/v1/auth/verify-account`, {
+				method: "POST",
+				body: JSON.stringify({
+					token,
+				}),
 				headers: new Headers({ "Content-Type": "application/json" }),
 			});
 		},

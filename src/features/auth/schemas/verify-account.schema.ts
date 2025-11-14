@@ -1,7 +1,8 @@
 import z from "zod";
+import { VERIFICATION_TOKEN_MAX_LENGTH } from "../const/zod.js";
 
 export const VerifyAccountRequestSchema = z.object({
-	token: z.string().max(100).nonempty(),
+	token: z.string().max(VERIFICATION_TOKEN_MAX_LENGTH).nonempty(),
 });
 
 export const VerifyAccountResponeSchema = z.null();
