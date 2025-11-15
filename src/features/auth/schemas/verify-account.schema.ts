@@ -5,7 +5,6 @@ export const VerifyAccountRequestSchema = z.object({
 	token: z.string().max(VERIFICATION_TOKEN_MAX_LENGTH).nonempty(),
 });
 
-export const VerifyAccountResponeSchema = z.null();
+export const VerifyAccountResponseSchema = z.null();
 
 export type VerifyAccountRequest = z.infer<typeof VerifyAccountRequestSchema>;
-export type VerifyAccountResponse = z.infer<typeof VerifyAccountResponeSchema>;

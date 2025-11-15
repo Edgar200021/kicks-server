@@ -4,7 +4,9 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
+		"build": "tsc",
 		"test": "vitest --run",
+		"start": "npm run build && node dist/server.js",
 		"start:dev": "npx tsx --watch --env-file=.env.development src/server.ts",
 		"kysely:codegen": "kysely-codegen --out-file ./src/common/types/db.ts --camel-case --dialect=postgres --runtime-enums=pascal-case",
 		"migration:create": "npx kysely migrate:make",
@@ -44,6 +46,7 @@
 	},
 	"dependencies": {
 		"@fastify/autoload": "^6.3.1",
+		"@fastify/cookie": "^11.0.2",
 		"@fastify/cors": "^11.1.0",
 		"@fastify/helmet": "^13.0.2",
 		"@fastify/rate-limit": "^10.3.0",

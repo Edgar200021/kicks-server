@@ -19,9 +19,9 @@ const sdk = new NodeSDK({
 		[ATTR_SERVICE_VERSION]: "1.0",
 	}),
 	traceExporter: new ConsoleSpanExporter(),
-	metricReader: new PeriodicExportingMetricReader({
+	metricReaders: [new PeriodicExportingMetricReader({
 		exporter: new ConsoleMetricExporter(),
-	}),
+	})],
 	instrumentations: [getNodeAutoInstrumentations()],
 });
 

@@ -1,10 +1,10 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import z from "zod";
+import { ErrorResponseSchema } from "@/common/schemas/error-response.schema.js";
 import {
-	ErrorResponseSchema,
 	SuccessResponseSchema,
 	ValidationErrorResponseSchema,
-} from "@/common/schemas/base.js";
+} from "@/common/schemas/index.js";
 import {
 	SignInRequestSchema,
 	SignInResponseSchema,
@@ -15,10 +15,12 @@ import {
 } from "../../schemas/sign-up.schema.js";
 import {
 	VerifyAccountRequestSchema,
-	VerifyAccountResponeSchema,
+	VerifyAccountResponseSchema,
 } from "../../schemas/verify-account.schema.js";
 
 export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
+	const { config } = fastify;
+
 	fastify.post(
 		"/sign-up",
 		{
@@ -62,8 +64,15 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 			},
 		},
 		async (req, reply) => {
-			const user = await fastify.services.authService.signIn(req.body);
-			return reply.status(200).send({ statusCode: 200, data: user });
+			const { sessionId, data } = await fastify.services.authService.signIn(
+				req.body,
+			);
+			return reply
+				.status(200)
+				.cookie(config.application.sessionCookieName, sessionId, {
+					maxAge: config.application.sessionTTLMinutes * 60,
+				})
+				.send({ statusCode: 200, data });
 		},
 	);
 
@@ -79,7 +88,7 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 			schema: {
 				body: VerifyAccountRequestSchema,
 				response: {
-					200: SuccessResponseSchema(VerifyAccountResponeSchema),
+					200: SuccessResponseSchema(VerifyAccountResponseSchema),
 					400: z.union([ValidationErrorResponseSchema, ErrorResponseSchema]),
 				},
 				tags: ["Authentication"],

@@ -10,18 +10,18 @@ import {
 	serializerCompiler,
 	validatorCompiler,
 } from "fastify-type-provider-zod";
-import { setupDatabase } from "./common/database.js";
-import { setupNodemailer } from "./common/nodemailer.js";
-import { setupRedis } from "./common/redis.js";
+import {
+	setupDatabaseClient,
+	setupNodemailerClient,
+	setupRedisClient,
+} from "./common/clients/index.js";
 import { createEmailService } from "./common/services/email.service.js";
 import type { Config } from "./config/config.js";
 import type { LoggerConfig } from "./config/logger.config.js";
 import { authRoutesV1 } from "./features/auth/routes/v1/auth.routes.js";
-import {
-	type AuthService,
-	createAuthService,
-} from "./features/auth/service/auth.service.js";
+import { AuthService } from "./features/auth/service/auth.service.js";
 import { createUsersRepository } from "./features/users/repository/users.repository.js";
+import { usersRoutesV1 } from "./features/users/routes/v1/users.routes";
 
 declare module "fastify" {
 	interface FastifyInstance {
@@ -79,34 +79,42 @@ export const buildApp = async (config: Config) => {
 	app.decorate("config", config);
 
 	await app.register(autoload, {
-		dir: path.join(import.meta.dirname, "plugins"),
+		dir: path.join(import.meta.dirname, "plugins/external"),
 		options: { ...app.options },
 		encapsulate: false,
 	});
 
-	const db = await setupDatabase(config.database);
-	const redis = await setupRedis(config.redis);
+	const [dbClient, redisClient, nodemailerClient] = await Promise.all([
+		setupDatabaseClient(config.database),
+		setupRedisClient(config.redis),
+		setupNodemailerClient(config.mailer),
+	]);
 
-	const nodemailer = await setupNodemailer(config.mailer);
+	const usersRepository = createUsersRepository(dbClient);
 
-	const usersRepository = createUsersRepository(db);
-
-	const emailService = createEmailService(nodemailer, config.application);
+	const emailService = createEmailService(nodemailerClient, config.application);
 
 	const services = {
-		authService: createAuthService({
+		authService: new AuthService(
 			usersRepository,
-			redis,
-			config,
 			emailService,
-		}),
+			redisClient,
+			config.application,
+		),
 	};
 
 	app.decorate<typeof services>("services", services);
 
+	await app.register(autoload, {
+		dir: path.join(import.meta.dirname, "plugins/internal"),
+		options: { ...app.options },
+		encapsulate: false,
+	});
+
 	app.register(
 		(instance) => {
 			instance.register(authRoutesV1, { prefix: "/auth" });
+			instance.register(usersRoutesV1, { prefix: "/user" });
 		},
 		{
 			prefix: "/api/v1",
@@ -114,8 +122,8 @@ export const buildApp = async (config: Config) => {
 	);
 
 	app.addHook("onClose", async () => {
-		await Promise.all([db.destroy(), redis.quit()]);
-		nodemailer.close();
+		await Promise.all([dbClient.destroy(), redisClient.quit()]);
+		nodemailerClient.close();
 	});
 
 	await app.ready();

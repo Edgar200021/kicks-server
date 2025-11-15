@@ -18,6 +18,11 @@ const applicationConfigSchema = z.object({
 	clientResetPasswordPath: z.string().trim().nonempty(),
 	verificationTokenTTLMinutes: z.coerce.number().min(60).max(1440),
 	sessionTTLMinutes: z.coerce.number().min(1440).max(43800),
+	sessionCookieName: z.string().nonempty(),
+	cookieSecret: z.string().min(20).nonempty(),
+	cookieSecure: z
+		.enum(["true", "false"])
+		.transform((value) => value === "true"),
 });
 
 const configSchema = z.object({
@@ -43,6 +48,9 @@ export const setupConfig = (): Config => {
 				process.env.APPLICATION_CLIENT_RESET_PASSWORD_PATH,
 			verificationTokenTTLMinutes: process.env.VERIFICATION_TOKEN_TTL_MINUTES,
 			sessionTTLMinutes: process.env.SESSION_TTL_MINUTES,
+			cookieSecret: process.env.APPLICATION_COOKIE_SECRET,
+			cookieSecure: process.env.APPLICATION_COOKIE_SECURE,
+			sessionCookieName: process.env.SESSION_COOKIE_NAME,
 		},
 		logger: {
 			level: process.env.LOG_LEVEL,

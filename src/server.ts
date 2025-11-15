@@ -2,7 +2,7 @@ import closeWithGrace from "close-with-grace";
 import client from "prom-client";
 import { buildApp } from "./app.js";
 // import "./instrumentation.js";
-import { deepFreeze } from "./common/utils/utils.js";
+import { deepFreeze } from "@/common/utils/index.js";
 import { setupConfig } from "./config/config.js";
 
 const registry = new client.Registry();

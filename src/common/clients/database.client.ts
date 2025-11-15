@@ -3,7 +3,7 @@ import { Pool } from "pg";
 import type { DB } from "@/common/types/db.js";
 import type { DatabaseConfig } from "@/config/database.config.js";
 
-export const setupDatabase = async (
+export const setupDatabaseClient = async (
 	config: DatabaseConfig,
 ): Promise<Kysely<DB>> => {
 	const dialect = new PostgresDialect({

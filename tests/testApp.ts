@@ -1,15 +1,40 @@
 import { randomUUID } from "node:crypto";
 import { RedisContainer } from "@testcontainers/redis";
 import Redis from "ioredis";
-import { BodyMixin, Headers, request } from "undici";
-import { expect } from "vitest";
-import { buildApp } from "../src/app";
-import { VERIFICATION_PREFIX } from "../src/common/const/redis";
-import { deepFreeze } from "../src/common/utils/utils";
-import { setupConfig } from "../src/config/config";
-import { setupTestDb } from "./setupTestDb";
+import { type Dispatcher, Headers, request } from "undici";
+import type { UndiciHeaders } from "undici/types/dispatcher.js";
+import { buildApp } from "../src/app.js";
+import { VERIFICATION_PREFIX } from "../src/common/const/index.js";
+import { deepFreeze } from "../src/common/utils/index.js";
+import { setupConfig } from "../src/config/config.js";
+import { setupTestDb } from "./setupTestDb.js";
 
 export type TestApp = Awaited<ReturnType<typeof createTestApp>>;
+type RequestOptions = Partial<Omit<Dispatcher.RequestOptions, "method">>;
+
+const buildHeaders = (headers?: UndiciHeaders) => {
+	return (
+		Array.isArray(headers)
+			? headers
+			: headers instanceof Headers
+				? Array.from(headers.entries())
+				: headers && typeof headers === "object"
+					? Object.entries(headers)
+					: []
+	).reduce(
+		(result, [key, value]) => {
+			if (Array.isArray(value)) {
+				for (const v of value) {
+					result.set(key, v);
+				}
+			} else if (value != null) {
+				result.set(key, value);
+			}
+			return result;
+		},
+		new Headers({ "Content-Type": "application/json" }),
+	);
+};
 
 export const omit = <T extends Record<string, unknown>>(
 	obj: T,
@@ -63,6 +88,7 @@ const createTestApp = async () => {
 		},
 		db,
 		rateLimitConfig: config.rateLimit,
+		applicationConfig: config.application,
 
 		async getVerificationToken() {
 			return (await redis.keys("*"))
@@ -72,44 +98,65 @@ const createTestApp = async () => {
 				.at(-1);
 		},
 
-		async signUp(body?: unknown) {
+		async signUp(options?: RequestOptions) {
 			return request(`${address}/api/v1/auth/sign-up`, {
 				method: "POST",
-				body,
-				headers: new Headers({ "Content-Type": "application/json" }),
+				...options,
+				headers: buildHeaders(options?.headers),
 			});
 		},
 
-		async signIn(body?: unknown) {
+		async signIn(options?: RequestOptions) {
 			return request(`${address}/api/v1/auth/sign-in`, {
 				method: "POST",
-				body,
-				headers: new Headers({ "Content-Type": "application/json" }),
+				...options,
+				headers: buildHeaders(options?.headers),
 			});
 		},
 
-		async verifyAccount(body?: unknown) {
+		async verifyAccount(options?: RequestOptions) {
 			return request(`${address}/api/v1/auth/verify-account`, {
 				method: "POST",
-				body,
-				headers: new Headers({ "Content-Type": "application/json" }),
+				...options,
+				headers: buildHeaders(options?.headers),
 			});
 		},
 
-		async createAndVerify(body?: unknown) {
-			const response = await this.signUp(body);
+		async createAndVerify(options?: RequestOptions) {
+			const response = await this.signUp(options);
 			if (response.statusCode !== 201) {
 				throw new Error("Failed to signup");
 			}
 
 			const token = await this.getVerificationToken();
-			return request(`${address}/api/v1/auth/verify-account`, {
-				method: "POST",
-				body: JSON.stringify({
-					token,
-				}),
-				headers: new Headers({ "Content-Type": "application/json" }),
-			});
+			return this.verifyAccount({ body: JSON.stringify({ token }) });
+		},
+
+		async createAndSignIn(options?: RequestOptions) {
+			const response = await this.createAndVerify(options);
+			if (response.statusCode !== 200) {
+				throw new Error("Failed to signup and verify");
+			}
+
+			const signInResponse = await this.signIn(options);
+			if (signInResponse.statusCode !== 200) {
+				throw new Error("Failed to signup and verify");
+			}
+
+			const cookie = signInResponse.headers["set-cookie"];
+			if (!cookie) {
+				throw new Error("Cookies are empty");
+			}
+
+			const sessionCookie = (Array.isArray(cookie) ? cookie : [cookie]).find(
+				(c: string) => c.startsWith(`${config.application.sessionCookieName}=`),
+			);
+
+			if (!sessionCookie) {
+				throw new Error("Session is empty");
+			}
+
+			return cookie;
 		},
 	};
 };

@@ -1,13 +1,13 @@
 import { createTransport, type Transporter } from "nodemailer";
 import type { MailerConfig } from "@/config/mailer.config.js";
 
-export const setupNodemailer = ({
-	host,
-	port,
-	user,
-	password: pass,
-	secure,
-}: MailerConfig): Promise<Transporter> => {
+export const setupNodemailerClient = ({
+																	host,
+																	port,
+																	user,
+																	password: pass,
+																	secure,
+																}: MailerConfig): Promise<Transporter> => {
 	const transporter = createTransport({
 		host,
 		port,
