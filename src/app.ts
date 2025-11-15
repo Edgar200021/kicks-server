@@ -21,7 +21,7 @@ import type { LoggerConfig } from "./config/logger.config.js";
 import { authRoutesV1 } from "./features/auth/routes/v1/auth.routes.js";
 import { AuthService } from "./features/auth/service/auth.service.js";
 import { createUsersRepository } from "./features/users/repository/users.repository.js";
-import { usersRoutesV1 } from "./features/users/routes/v1/users.routes";
+import { usersRoutesV1 } from "./features/users/routes/v1/users.routes.js";
 
 declare module "fastify" {
 	interface FastifyInstance {

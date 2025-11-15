@@ -9,6 +9,7 @@ export const setupDatabaseClient = async (
 	const dialect = new PostgresDialect({
 		pool: new Pool({
 			database: config.name,
+			password: config.password,
 			host: config.host,
 			user: config.user,
 			port: config.port,

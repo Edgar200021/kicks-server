@@ -1,8 +1,8 @@
 import closeWithGrace from "close-with-grace";
 import client from "prom-client";
-import { buildApp } from "./app.js";
 // import "./instrumentation.js";
 import { deepFreeze } from "@/common/utils/index.js";
+import { buildApp } from "./app.js";
 import { setupConfig } from "./config/config.js";
 
 const registry = new client.Registry();
@@ -26,7 +26,7 @@ closeWithGrace({ delay: 500 }, async ({ err, signal }) => {
 
 try {
 	await app.listen({
-		host: "127.0.0.1",
+		host: "0.0.0.0",
 		port: config.application.port,
 	});
 } catch (err) {

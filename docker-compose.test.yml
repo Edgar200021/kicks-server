@@ -1,0 +1,25 @@
+services:
+  api_test:
+    build:
+      context: .
+      target: testing
+    depends_on:
+      postgres_test:
+        condition: service_healthy
+    environment:
+      DATABASE_HOST: postgres_test
+      DOCKER_HOST: unix:///var/run/docker.sock
+    volumes:
+       - /var/run/docker.sock:/var/run/docker.sock
+  postgres_test:
+    image: postgres:18-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5

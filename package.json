@@ -4,10 +4,16 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"build": "tsc",
-		"test": "vitest --run",
-		"start": "npm run build && node dist/server.js",
+		"start": "node dist/server.js",
 		"start:dev": "npx tsx --watch --env-file=.env.development src/server.ts",
+		"build": "tsc",
+
+		"test": "docker compose -p kicks-server-test --env-file .env.test -f docker-compose.test.yml up --build --abort-on-container-exit && docker compose -p kicks-server-test --env-file .env.test -f docker-compose.test.yml down --rmi all -v",
+		"test:coverage": "vitest run --coverage",
+
+		"docker:dev:up": "docker compose -f docker-compose.dev.yml --env-file .env.development up --build",
+		"docker:dev:down": "docker compose -f docker-compose.dev.yml --env-file .env.development down --rmi all",
+
 		"kysely:codegen": "kysely-codegen --out-file ./src/common/types/db.ts --camel-case --dialect=postgres --runtime-enums=pascal-case",
 		"migration:create": "npx kysely migrate:make",
 		"migration:run": "npx kysely migrate:latest",

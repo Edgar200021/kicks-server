@@ -1,14 +1,20 @@
 import { httpErrors } from "@fastify/sensible";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import fp from "fastify-plugin";
+import type { Selectable } from "kysely";
 import type { Nullable } from "@/common/types/common.js";
-import type { User } from "@/features/users/schemas/user.schema.js";
+import type { Users } from "@/common/types/db.js";
 
 declare module "fastify" {
 	export interface FastifyRequest {
 		authenticate: ReturnType<typeof authenticate>;
 		authorize: typeof authorize;
-		user: Nullable<User>;
+		user: Nullable<
+			Pick<
+				Selectable<Users>,
+				"email" | "firstName" | "lastName" | "role" | "gender"
+			>
+		>;
 	}
 }
 
@@ -46,7 +52,10 @@ function authenticate(instance: FastifyInstance) {
 	};
 }
 
-async function authorize(this: FastifyRequest, roles: User["role"][]) {
+async function authorize(
+	this: FastifyRequest,
+	roles: Selectable<Users>["role"][],
+) {
 	if (!this.user) {
 		throw httpErrors.unauthorized("Unauthorized");
 	}
