@@ -22,7 +22,16 @@ export const usersRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 				throw httpErrors.unauthorized("Unauthorized");
 			}
 
-			return reply.status(200).send({ statusCode: 200, data: req.user });
+			return reply.status(200).send({
+				statusCode: 200,
+				data: {
+					email: req.user.email,
+					firstName: req.user.firstName,
+					lastName: req.user.lastName,
+					gender: req.user.gender,
+					role: req.user.role,
+				},
+			});
 		},
 	);
 };

@@ -29,9 +29,13 @@ RUN npm run build
 
 FROM node:24-alpine as production
 
+RUN apk update && apk add --no-cache dumb-init
+
 WORKDIR /app
+
 COPY package*.json ./
 RUN npm ci --only=production
+
 COPY --from=build /app/dist ./dist
 
-CMD [ "npm", "run", "start" ]
+CMD ["dumb-init", "npm", "run", "start"]

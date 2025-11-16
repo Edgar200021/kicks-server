@@ -1,14 +1,14 @@
-import type { Kysely, Selectable } from "kysely";
-import type { DB, Users } from "@/common/types/db.js";
+import type { Selectable } from "kysely";
+import type { Users } from "@/common/types/db.js";
+import type { UsersRepository } from "./users.repository.js";
 
-export const getById =
-	(db: Kysely<DB>) =>
-	async (
-		id: Selectable<Users>["id"],
-	): Promise<Selectable<Users> | undefined> => {
-		return await db
-			.selectFrom("users")
-			.selectAll()
-			.where("id", "=", id)
-			.executeTakeFirst();
-	};
+export async function getById(
+	this: UsersRepository,
+	id: Selectable<Users>["id"],
+): Promise<Selectable<Users> | undefined> {
+	return await this.db
+		.selectFrom("users")
+		.selectAll()
+		.where("id", "=", id)
+		.executeTakeFirst();
+}

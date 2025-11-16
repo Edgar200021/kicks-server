@@ -1,14 +1,16 @@
-import type { Insertable, Kysely, Selectable } from "kysely";
-import type { DB, Users } from "@/common/types/db.js";
+import type { Insertable, Selectable } from "kysely";
+import type { Users } from "@/common/types/db.js";
+import type { UsersRepository } from "./users.repository.js";
 
-export const create =
-	(db: Kysely<DB>) =>
-	async (user: Insertable<Users>): Promise<Selectable<Users>["id"]> => {
-		const { id } = await db
-			.insertInto("users")
-			.values(user)
-			.returning("id")
-			.executeTakeFirstOrThrow();
+export async function create(
+	this: UsersRepository,
+	user: Insertable<Users>,
+): Promise<Selectable<Users>["id"]> {
+	const { id } = await this.db
+		.insertInto("users")
+		.values(user)
+		.returning("id")
+		.executeTakeFirstOrThrow();
 
-		return id;
-	};
+	return id;
+}

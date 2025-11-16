@@ -5,8 +5,7 @@ import { deepFreeze } from "@/common/utils/index.js";
 import { buildApp } from "./app.js";
 import { setupConfig } from "./config/config.js";
 
-const registry = new client.Registry();
-client.collectDefaultMetrics({ register: registry });
+client.collectDefaultMetrics();
 
 const config = setupConfig();
 deepFreeze(config);

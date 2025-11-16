@@ -1,7 +1,9 @@
-import type { Kysely, Selectable } from "kysely";
-import type { DB, Users } from "@/common/types/db.js";
+import type { Selectable } from "kysely";
+import type { Users } from "@/common/types/db.js";
+import type { UsersRepository } from "./users.repository.js";
 
-export const getAll =
-	(db: Kysely<DB>) => async (): Promise<Selectable<Users>[]> => {
-		return await db.selectFrom("users").selectAll().execute();
-	};
+export async function getAll(
+	this: UsersRepository,
+): Promise<Selectable<Users>[]> {
+	return await this.db.selectFrom("users").selectAll().execute();
+}

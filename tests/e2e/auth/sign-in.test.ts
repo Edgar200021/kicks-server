@@ -192,6 +192,7 @@ describe("Authentication", () => {
 		it("Should be rate limited", async () => {
 			await withTestApp(async (testApp) => {
 				await Promise.all(
+					// biome-ignore lint:has default value
 					Array.from({ length: testApp.rateLimitConfig.signInLimit! }).map(
 						async () => {
 							const res = await testApp.signIn({

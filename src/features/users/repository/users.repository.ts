@@ -6,14 +6,12 @@ import { getByEmail } from "./get-by-email.js";
 import { getById } from "./get-by-id.js";
 import { update } from "./update.js";
 
-export type UsersRepository = ReturnType<typeof createUsersRepository>;
+export class UsersRepository {
+	getAll = getAll;
+	getById = getById;
+	getByEmail = getByEmail;
+	create = create;
+	update = update;
 
-export const createUsersRepository = (db: Kysely<DB>) => {
-	return {
-		getAll: getAll(db),
-		getById: getById(db),
-		getByEmail: getByEmail(db),
-		create: create(db),
-		update: update(db),
-	};
-};
+	constructor(readonly db: Kysely<DB>) {}
+}

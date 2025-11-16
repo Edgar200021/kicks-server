@@ -6,14 +6,13 @@
 	"scripts": {
 		"start": "node dist/server.js",
 		"start:dev": "npx tsx --watch --env-file=.env.development src/server.ts",
-		"build": "tsc",
-
+    "build": "tsc",
+		"lint-format": "npx @biomejs/biome check --write",
 		"test": "docker compose -p kicks-server-test --env-file .env.test -f docker-compose.test.yml up --build --abort-on-container-exit && docker compose -p kicks-server-test --env-file .env.test -f docker-compose.test.yml down --rmi all -v",
+    "test:dev": "vitest --run",
 		"test:coverage": "vitest run --coverage",
-
 		"docker:dev:up": "docker compose -f docker-compose.dev.yml --env-file .env.development up --build",
 		"docker:dev:down": "docker compose -f docker-compose.dev.yml --env-file .env.development down --rmi all",
-
 		"kysely:codegen": "kysely-codegen --out-file ./src/common/types/db.ts --camel-case --dialect=postgres --runtime-enums=pascal-case",
 		"migration:create": "npx kysely migrate:make",
 		"migration:run": "npx kysely migrate:latest",
@@ -37,6 +36,7 @@
 	"license": "ISC",
 	"type": "module",
 	"devDependencies": {
+		"@biomejs/biome": "2.3.5",
 		"@faker-js/faker": "^10.1.0",
 		"@testcontainers/redis": "^11.8.1",
 		"@tsconfig/node24": "^24.0.1",

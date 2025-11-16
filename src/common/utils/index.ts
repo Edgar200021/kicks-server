@@ -1,2 +1,2 @@
-export * from "./deep-freeze.js"
-export * from "./scrypt.js"
+export * from "./deep-freeze.js";
+export * from "./scrypt.js";

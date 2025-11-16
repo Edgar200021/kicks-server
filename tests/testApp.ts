@@ -83,8 +83,11 @@ const createTestApp = async () => {
 	return {
 		async close() {
 			await app.close();
-			await db.destroy();
-			await removeDb();
+			await Promise.all([db.destroy(), redis.quit()]);
+			await Promise.all([
+				redisContainer.stop({ remove: true, removeVolumes: true }),
+				removeDb(),
+			]);
 		},
 		db,
 		rateLimitConfig: config.rateLimit,

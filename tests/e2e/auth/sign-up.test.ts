@@ -1,5 +1,4 @@
 import { faker } from "@faker-js/faker";
-import { Headers } from "undici";
 import { describe, expect, it } from "vitest";
 import {
 	FIRST_NAME_MAX_LENGTH,
@@ -171,6 +170,7 @@ describe("Authentication", () => {
 		it("Should be rate limited", async () => {
 			await withTestApp(async (testApp) => {
 				await Promise.all(
+					// biome-ignore lint:has default value
 					Array.from({ length: testApp.rateLimitConfig.signUpLimit! }).map(
 						async () => {
 							const res = await testApp.signUp({

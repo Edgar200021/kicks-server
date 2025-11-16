@@ -160,6 +160,7 @@ describe("Authentication", () => {
 			await withTestApp(async (testApp) => {
 				await Promise.all(
 					Array.from({
+						// biome-ignore lint:has default value
 						length: testApp.rateLimitConfig.accountVerificationLimit!,
 					}).map(async () => {
 						const res = await testApp.verifyAccount({

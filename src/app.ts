@@ -15,12 +15,12 @@ import {
 	setupNodemailerClient,
 	setupRedisClient,
 } from "./common/clients/index.js";
-import { createEmailService } from "./common/services/email.service.js";
+import { EmailService } from "./common/services/email.service.js";
 import type { Config } from "./config/config.js";
 import type { LoggerConfig } from "./config/logger.config.js";
 import { authRoutesV1 } from "./features/auth/routes/v1/auth.routes.js";
 import { AuthService } from "./features/auth/service/auth.service.js";
-import { createUsersRepository } from "./features/users/repository/users.repository.js";
+import { UsersRepository } from "./features/users/repository/users.repository.js";
 import { usersRoutesV1 } from "./features/users/routes/v1/users.routes.js";
 
 declare module "fastify" {
@@ -30,14 +30,15 @@ declare module "fastify" {
 		};
 	}
 }
+
 const loggerOptions = (
 	config: LoggerConfig,
 ): FastifyLoggerOptions<RawServerBase> & PinoLoggerOptions => {
 	return {
 		level: config.level,
 		formatters: {
-			level(_, number) {
-				return { level: number };
+			level(level) {
+				return { level };
 			},
 		},
 		transport: {
@@ -50,7 +51,15 @@ const loggerOptions = (
 						translateTime: "HH:MM:ss Z",
 					},
 		},
-		redact: { paths: ["password"], remove: true },
+		redact: {
+			paths: [
+				"req.headers.authorization",
+				"req.body.password",
+				"req.body.email",
+				"password",
+			],
+			censor: "***",
+		},
 		base: { pid: process.pid },
 		serializers: {
 			req(req) {
@@ -61,6 +70,12 @@ const loggerOptions = (
 					remoteAddress: req.ip,
 					remotePort: req.socket.remotePort,
 					agent: req.headers["user-agent"],
+				};
+			},
+			res(reply) {
+				return {
+					statusCode: reply.statusCode,
+					user: reply.request?.user?.id,
 				};
 			},
 		},
@@ -90,9 +105,9 @@ export const buildApp = async (config: Config) => {
 		setupNodemailerClient(config.mailer),
 	]);
 
-	const usersRepository = createUsersRepository(dbClient);
+	const usersRepository = new UsersRepository(dbClient);
 
-	const emailService = createEmailService(nodemailerClient, config.application);
+	const emailService = new EmailService(nodemailerClient, config.application);
 
 	const services = {
 		authService: new AuthService(

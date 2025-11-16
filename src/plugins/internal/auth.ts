@@ -12,7 +12,7 @@ declare module "fastify" {
 		user: Nullable<
 			Pick<
 				Selectable<Users>,
-				"email" | "firstName" | "lastName" | "role" | "gender"
+				"id" | "email" | "firstName" | "lastName" | "role" | "gender"
 			>
 		>;
 	}
@@ -31,7 +31,7 @@ function authenticate(instance: FastifyInstance) {
 			throw instance.httpErrors.unauthorized("Unauthorized");
 		}
 
-		const { email, firstName, role, lastName, gender } =
+		const { id, email, firstName, role, lastName, gender } =
 			await instance.services.authService.authenticate(unsigned.value);
 
 		reply.setCookie(
@@ -43,6 +43,7 @@ function authenticate(instance: FastifyInstance) {
 		);
 
 		this.user = {
+			id,
 			email,
 			role,
 			firstName,
@@ -67,9 +68,11 @@ async function authorize(
 
 export default fp(async (fastify) => {
 	fastify.decorateRequest("user", null);
+
 	fastify.addHook("onRequest", async (req) => {
 		req.user = null;
 	});
+
 	fastify.decorateRequest("authenticate", authenticate(fastify));
 	fastify.decorateRequest("authorize", authorize);
 });
