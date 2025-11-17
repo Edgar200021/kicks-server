@@ -16,8 +16,8 @@ import {
 	setupRedisClient,
 } from "./common/clients/index.js";
 import { EmailService } from "./common/services/email.service.js";
-import type { Config } from "./config/config.js";
-import type { LoggerConfig } from "./config/logger.config.js";
+import { OAuth2Service } from "./common/services/oauth2.service.js";
+import type { ApplicationConfig, Config } from "./config/config.js";
 import { authRoutesV1 } from "./features/auth/routes/v1/auth.routes.js";
 import { AuthService } from "./features/auth/service/auth.service.js";
 import { UsersRepository } from "./features/users/repository/users.repository.js";
@@ -32,18 +32,18 @@ declare module "fastify" {
 }
 
 const loggerOptions = (
-	config: LoggerConfig,
+	config: ApplicationConfig,
 ): FastifyLoggerOptions<RawServerBase> & PinoLoggerOptions => {
 	return {
-		level: config.level,
+		level: config.logLevel,
 		formatters: {
 			level(level) {
 				return { level };
 			},
 		},
 		transport: {
-			target: config.structured ? "pino/file" : "pino-pretty",
-			options: config.structured
+			target: config.logStructured ? "pino/file" : "pino-pretty",
+			options: config.logStructured
 				? {}
 				: {
 						colorize: true,
@@ -84,7 +84,7 @@ const loggerOptions = (
 
 export const buildApp = async (config: Config) => {
 	const app = fastify({
-		logger: loggerOptions(config.logger),
+		logger: loggerOptions(config.application),
 		genReqId: () => randomUUID().toString(),
 	});
 
@@ -108,11 +108,13 @@ export const buildApp = async (config: Config) => {
 	const usersRepository = new UsersRepository(dbClient);
 
 	const emailService = new EmailService(nodemailerClient, config.application);
+	const oauth2Service = new OAuth2Service(config.application);
 
 	const services = {
 		authService: new AuthService(
 			usersRepository,
 			emailService,
+			oauth2Service,
 			redisClient,
 			config.application,
 		),

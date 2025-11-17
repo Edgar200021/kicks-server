@@ -50,7 +50,7 @@ export default fp(async (fastify) => {
 			});
 		}
 
-		if (err instanceof fastify.httpErrors.HttpError) {
+		if (err instanceof fastify.httpErrors.HttpError && err.statusCode < 500) {
 			return reply
 				.status(err.statusCode)
 				.send({ statusCode: err.statusCode, error: err.message });

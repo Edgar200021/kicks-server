@@ -5,12 +5,10 @@ import type { UsersRepository } from "./users.repository.js";
 export async function create(
 	this: UsersRepository,
 	user: Insertable<Users>,
-): Promise<Selectable<Users>["id"]> {
-	const { id } = await this.db
+): Promise<Selectable<Users>> {
+	return await this.db
 		.insertInto("users")
 		.values(user)
-		.returning("id")
+		.returningAll()
 		.executeTakeFirstOrThrow();
-
-	return id;
 }

@@ -15,7 +15,7 @@ export async function signUp(
 	}
 
 	const hashedPassword = await scryptHash(password);
-	const id = await this.usersRepository.create({
+	const { id } = await this.usersRepository.create({
 		email,
 		firstName,
 		lastName,

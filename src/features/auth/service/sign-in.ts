@@ -21,7 +21,7 @@ export async function signIn(
 		);
 	}
 
-	const sessionId = await this.generateSession(user.id);
+	const sessionId = await this.generateSession(user.id, "regular");
 
 	return {
 		sessionId,

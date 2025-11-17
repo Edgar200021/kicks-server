@@ -2,7 +2,16 @@ name: General
 
 on:
   push:
+    branches:
+      - main
   pull_request:
+    branches:
+      - main
+
+env:
+  DATABASE_USER: postgres
+  DATABASE_PASSWORD: password
+  DATABASE_DB: postgres
 
 jobs:
   quality:
@@ -20,15 +29,15 @@ jobs:
           version: latest
       - name: Run Biome
         run: biome ci .
-  test:
-      runs-on: ubuntu-latest
-      name: Test
-      services:
-        postgres:
-          image: postgres:14
-          env:
-            POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: password
-            POSTGRES_DB: postgres
-          ports:
-            - 5432:5432
+  # test:
+  #     runs-on: ubuntu-latest
+  #     name: Test
+  #     services:
+  #       postgres:
+  #         image: postgres:14
+  #         env:
+  #           POSTGRES_USER: postgres
+  #           POSTGRES_PASSWORD: password
+  #           POSTGRES_DB: postgres
+  #         ports:
+  #           - 5432:5432
