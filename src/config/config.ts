@@ -22,13 +22,20 @@ const applicationConfigSchema = z.object({
 	verificationTokenTTLMinutes: z.coerce.number().min(60).max(1440),
 	sessionTTLMinutes: z.coerce.number().min(1440).max(43800),
 	oauthSessionTtlMinutes: z.coerce.number().min(60).max(1440),
+	oauthStateTTlMinutes: z.coerce.number().min(1).max(3),
 	sessionCookieName: z.string().nonempty(),
+	oauthStateCookieName: z.string().nonempty(),
 	cookieSecret: z.string().min(20).nonempty(),
 	cookieSecure: z
 		.enum(["true", "false"])
 		.transform((value) => value === "true"),
 	oauth2: z.object({
 		google: z.object({
+			clientId: z.string().nonempty(),
+			clientSecret: z.string().nonempty(),
+			redirectUrl: z.url(),
+		}),
+		facebook: z.object({
 			clientId: z.string().nonempty(),
 			clientSecret: z.string().nonempty(),
 			redirectUrl: z.url(),
@@ -61,15 +68,22 @@ export const setupConfig = (): Config => {
 			verificationTokenTTLMinutes:
 				process.env.APPLICATION_VERIFICATION_TOKEN_TTL_MINUTES,
 			sessionTTLMinutes: process.env.APPLICATION_SESSION_TTL_MINUTES,
+			oauthStateTTlMinutes: process.env.APPLICATION_OAUTH_STATE_TTL_MINUTES,
 			oauthSessionTtlMinutes: process.env.APPLICATION_OAUTH_SESSION_TTL_MINUTES,
 			cookieSecret: process.env.APPLICATION_COOKIE_SECRET,
 			cookieSecure: process.env.APPLICATION_COOKIE_SECURE,
 			sessionCookieName: process.env.APPLICATION_SESSION_COOKIE_NAME,
+			oauthStateCookieName: process.env.APPLICATION_OAUTH_STATE_COOKIE_NAME,
 			oauth2: {
 				google: {
 					clientId: process.env.APPLICATION_OAUTH_GOOGLE_CLIENT_ID,
 					clientSecret: process.env.APPLICATION_OAUTH_GOOGLE_CLIENT_SECRET,
 					redirectUrl: process.env.APPLICATION_OAUTH_GOOGLE_REDIRECT_URL,
+				},
+				facebook: {
+					clientId: process.env.APPLICATION_OAUTH_FACEBOOK_CLIENT_ID,
+					clientSecret: process.env.APPLICATION_OAUTH_FACEBOOK_CLIENT_SECRET,
+					redirectUrl: process.env.APPLICATION_OAUTH_FACEBOOK_REDIRECT_URL,
 				},
 			},
 		},

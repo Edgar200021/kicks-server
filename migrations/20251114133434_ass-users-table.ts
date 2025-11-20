@@ -19,10 +19,10 @@ export async function up(db: Kysely<any>): Promise<void> {
 			col.primaryKey().defaultTo(sql`gen_random_uuid()`),
 		)
 		.addColumn("created_at", "timestamptz", (col) =>
-			col.notNull().defaultTo(sql`now()`),
+			col.notNull().defaultTo(sql`(now() at time zone 'utc')`),
 		)
 		.addColumn("updated_at", "timestamptz", (col) =>
-			col.notNull().defaultTo(sql`now()`),
+			col.notNull().defaultTo(sql` (now() at time zone 'utc')`),
 		)
 		.addColumn("email", "text", (col) => col.unique().notNull())
 		.addColumn("password", "text")
@@ -43,6 +43,7 @@ export async function up(db: Kysely<any>): Promise<void> {
 
 export async function down(db: Kysely<any>): Promise<void> {
 	await db.schema.dropTable("users").execute();
+  await db.schema.dropType("user_gender").execute();
 	await db.schema.dropType("user_role").execute();
 	await sql`DROP EXTENSION IF EXISTS pgcrypto`.execute(db);
 }

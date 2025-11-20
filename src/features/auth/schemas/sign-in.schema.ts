@@ -1,10 +1,10 @@
 import z from "zod";
+import { passwordSchema } from "@/features/auth/schemas/password.schema.js";
 import { UserSchema } from "@/features/users/schemas/user.schema.js";
-import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "../const/zod.js";
 
 export const SignInRequestSchema = z.object({
 	email: z.email(),
-	password: z.string().min(PASSWORD_MIN_LENGTH).max(PASSWORD_MAX_LENGTH),
+	password: passwordSchema,
 });
 
 export const SignInResponseSchema = UserSchema;

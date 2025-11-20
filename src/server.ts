@@ -19,7 +19,7 @@ closeWithGrace({ delay: 500 }, async ({ err, signal }) => {
 		app.log.info(`${signal} received, server closing `);
 	}
 
-	// app.scheduler.stop();
+	app.scheduler.stop();
 	await app.close();
 });
 

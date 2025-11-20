@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import path from "node:path";
 import autoload from "@fastify/autoload";
+import fastifySchedule from "@fastify/schedule";
 import fastify, {
 	type FastifyLoggerOptions,
 	type RawServerBase,
@@ -10,6 +11,7 @@ import {
 	serializerCompiler,
 	validatorCompiler,
 } from "fastify-type-provider-zod";
+import { UserService } from "@/features/users/service/users.service.js";
 import {
 	setupDatabaseClient,
 	setupNodemailerClient,
@@ -93,6 +95,7 @@ export const buildApp = async (config: Config) => {
 
 	app.decorate("config", config);
 
+	app.register(fastifySchedule);
 	await app.register(autoload, {
 		dir: path.join(import.meta.dirname, "plugins/external"),
 		options: { ...app.options },
@@ -118,6 +121,7 @@ export const buildApp = async (config: Config) => {
 			redisClient,
 			config.application,
 		),
+		userService: new UserService(usersRepository, app.scheduler),
 	};
 
 	app.decorate<typeof services>("services", services);

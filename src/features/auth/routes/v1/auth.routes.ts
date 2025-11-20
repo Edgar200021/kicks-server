@@ -1,3 +1,5 @@
+import { httpErrors } from "@fastify/sensible";
+import type { FastifyRequest } from "fastify";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import z from "zod";
 import { OAUTH_COOKIE_SESSION_PREFIX } from "@/common/const/cookie.js";
@@ -27,6 +29,20 @@ import {
 export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 	const { config } = fastify;
 
+	const getOAuthState = (req: FastifyRequest) => {
+		const cookieState = req.cookies[config.application.oauthStateCookieName];
+		if (!cookieState) {
+			throw httpErrors.badRequest("Invalid oauth state");
+		}
+
+		const unsigned = req.unsignCookie(cookieState);
+		if (!unsigned.valid) {
+			throw httpErrors.badRequest("Invalid oauth state");
+		}
+
+		return unsigned.value;
+	};
+
 	fastify.post(
 		"/sign-up",
 		{
@@ -47,7 +63,10 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 		},
 		async (req, reply) => {
 			await fastify.services.authService.signUp(req.body);
-			return reply.status(201).send({ statusCode: 201, data: null });
+			return reply.status(201).send({
+				statusCode: 201,
+				data: "Check your email and follow the link we sent to complete the verification.",
+			});
 		},
 	);
 
@@ -109,12 +128,12 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 	fastify.get(
 		"/google",
 		{
-			// config: {
-			// 	rateLimit: {
-			// 		timeWindow: "1 minute",
-			// 		max: fastify.config.rateLimit.signUpLimit,
-			// 	},
-			// },
+			config: {
+				rateLimit: {
+					timeWindow: "1 minute",
+					max: fastify.config.rateLimit.signInLimit,
+				},
+			},
 			schema: {
 				querystring: OAuth2RedirectUrlRequestQuerySchema,
 				response: {
@@ -125,24 +144,29 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 			},
 		},
 		async (req, reply) => {
-			const url = fastify.services.authService.genereateOauth2RedirectUrl(
-				req.query,
-				"google",
-			);
+			const { url, cookieState } =
+				fastify.services.authService.genereateOauth2RedirectUrl(
+					req.query,
+					"google",
+				);
 
-			return reply.redirect(url);
+			return reply
+				.setCookie(config.application.oauthStateCookieName, cookieState, {
+					maxAge: config.application.oauthStateTTlMinutes * 60,
+				})
+				.redirect(url);
 		},
 	);
 
 	fastify.post(
 		"/google",
 		{
-			// config: {
-			// 	rateLimit: {
-			// 		timeWindow: "1 minute",
-			// 		max: fastify.config.rateLimit.signUpLimit,
-			// 	},
-			// },
+			config: {
+				rateLimit: {
+					timeWindow: "1 minute",
+					max: fastify.config.rateLimit.signInLimit,
+				},
+			},
 			schema: {
 				body: GoogleSignInRequestSchema,
 				response: {
@@ -153,8 +177,78 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 			},
 		},
 		async (req, reply) => {
+			const cookieState = getOAuthState(req);
 			const { sessionId, data } =
-				await fastify.services.authService.googleSignIn(req.body);
+				await fastify.services.authService.googleSignIn(req.body, cookieState);
+
+			return reply
+				.cookie(
+					config.application.sessionCookieName,
+					`${OAUTH_COOKIE_SESSION_PREFIX}${sessionId}`,
+					{
+						maxAge: config.application.sessionTTLMinutes * 60,
+					},
+				)
+				.status(200)
+				.send({ statusCode: 200, data });
+		},
+	);
+
+	fastify.get(
+		"/facebook",
+		{
+			config: {
+				rateLimit: {
+					timeWindow: "1 minute",
+					max: fastify.config.rateLimit.signInLimit,
+				},
+			},
+			schema: {
+				querystring: OAuth2RedirectUrlRequestQuerySchema,
+				response: {
+					// 201: SuccessResponseSchema(SignUpResponseSchema),
+					400: z.union([ValidationErrorResponseSchema, ErrorResponseSchema]),
+				},
+				tags: ["Authentication"],
+			},
+		},
+		async (req, reply) => {
+			const { url, cookieState } =
+				fastify.services.authService.genereateOauth2RedirectUrl(
+					req.query,
+					"facebook",
+				);
+
+			return reply
+				.setCookie(config.application.oauthStateCookieName, cookieState, {
+					maxAge: config.application.oauthStateTTlMinutes * 60,
+				})
+				.redirect(url);
+		},
+	);
+
+	fastify.post(
+		"/facebook",
+		{
+			config: {
+				rateLimit: {
+					timeWindow: "1 minute",
+					max: fastify.config.rateLimit.signInLimit,
+				},
+			},
+			schema: {
+				body: GoogleSignInRequestSchema,
+				response: {
+					200: SuccessResponseSchema(GoogleSignInResponseSchema),
+					400: z.union([ValidationErrorResponseSchema, ErrorResponseSchema]),
+				},
+				tags: ["Authentication"],
+			},
+		},
+		async (req, reply) => {
+			const cookieState = getOAuthState(req);
+			const { sessionId, data } =
+				await fastify.services.authService.googleSignIn(req.body, cookieState);
 
 			return reply
 				.cookie(

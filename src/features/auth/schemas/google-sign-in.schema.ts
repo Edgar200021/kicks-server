@@ -3,6 +3,7 @@ import { UserSchema } from "@/features/users/schemas/user.schema.js";
 
 export const GoogleSignInRequestSchema = z.object({
 	code: z.string(),
+	state: z.string(),
 });
 
 export const GoogleSignInResponseSchema = UserSchema;

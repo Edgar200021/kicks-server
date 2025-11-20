@@ -1,4 +1,5 @@
 import z from "zod";
+import { UserGender } from "../types/db.js";
 
 export const GoogleAccessTokenSchema = z.union([
 	z.object({
@@ -22,4 +23,33 @@ export const GoogleUserSchema = z.object({
 	family_name: z.string(),
 });
 
-export type GoogleUser = z.infer<typeof GoogleUserSchema>;
+export const FacebookOAuth2AccessTokenSchema = z.union([
+	z.object({
+		access_token: z.string(),
+	}),
+	z.object({
+		error: z.object({
+			message: z.string(),
+		}),
+	}),
+]);
+
+export const FacebookOAuth2UserSchema = z.object({
+	id: z.string().nonempty(),
+	email: z.email().nonempty(),
+	first_name: z.string().nonempty(),
+	last_name: z.string().nonempty(),
+	gender: z
+		.string()
+		.nonempty()
+		.transform((gender) =>
+			gender === "male"
+				? UserGender.Male
+				: gender === "female"
+					? UserGender.Female
+					: undefined,
+		),
+});
+
+export type GoogleOAuth2User = z.infer<typeof GoogleUserSchema>;
+export type FacebookOAuth2User = z.infer<typeof FacebookOAuth2UserSchema>;
