@@ -1,21 +1,18 @@
 import { httpErrors } from "@fastify/sensible";
-import type { Selectable } from "kysely";
-import type { Nullable } from "@/common/types/common.js";
-import type { Users } from "@/common/types/db.js";
 import type {
-	GoogleSignInRequest,
+	GoogleSignInRequestQuery,
 	GoogleSignInResponse,
 } from "../../schemas/google-sign-in.schema.js";
 import type { AuthService } from "../auth.service.js";
 
 export async function googleSignIn(
 	this: AuthService,
-	data: GoogleSignInRequest,
+	data: GoogleSignInRequestQuery,
 	cookieState: string,
 ): Promise<{
 	sessionId: string;
 	data: GoogleSignInResponse;
-	redirectUrl?: string;
+	redirectUrl: string;
 }> {
 	const redirectPath = this.verifyOAuthState(data.state, cookieState);
 
@@ -35,18 +32,12 @@ export async function googleSignIn(
 			isVerified: true,
 		});
 
-		return await this.generateSessionAndReturnData.bind(this)(
-			user,
-			redirectPath,
-		);
+		return await this.generateSessionAndReturnData(user, redirectPath);
 	}
 
 	if (!dbUser.googleId) {
 		await this.usersRepository.update(dbUser.id, { googleId: googleUser.sub });
 	}
 
-	return await this.generateSessionAndReturnData.bind(this)(
-		dbUser,
-		redirectPath,
-	);
+	return await this.generateSessionAndReturnData(dbUser, redirectPath);
 }

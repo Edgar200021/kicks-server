@@ -8,3 +8,5 @@ export const UserSchema = z.object({
 	gender: z.enum(UserGender).nullable(),
 	role: z.enum(UserRole),
 });
+
+export type User = z.infer<typeof UserSchema>;

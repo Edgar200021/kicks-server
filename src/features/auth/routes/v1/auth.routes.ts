@@ -8,10 +8,8 @@ import {
 	SuccessResponseSchema,
 	ValidationErrorResponseSchema,
 } from "@/common/schemas/index.js";
-import {
-	GoogleSignInRequestSchema,
-	GoogleSignInResponseSchema,
-} from "../../schemas/google-sign-in.schema.js";
+import { FacebookSignInRequestQuerySchema } from "@/features/auth/schemas/facebook-sign-in.schema.js";
+import { GoogleSignInRequestQuerySchema } from "../../schemas/google-sign-in.schema.js";
 import { OAuth2RedirectUrlRequestQuerySchema } from "../../schemas/oauth2-redirect-url.js";
 import {
 	SignInRequestSchema,
@@ -89,8 +87,11 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 			},
 		},
 		async (req, reply) => {
+			const { sessionValue } = req.getSession();
+
 			const { sessionId, data } = await fastify.services.authService.signIn(
 				req.body,
+				sessionValue,
 			);
 			return reply
 				.status(200)
@@ -158,8 +159,8 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 		},
 	);
 
-	fastify.post(
-		"/google",
+	fastify.get(
+		"/google/callback",
 		{
 			config: {
 				rateLimit: {
@@ -168,9 +169,8 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 				},
 			},
 			schema: {
-				body: GoogleSignInRequestSchema,
+				querystring: GoogleSignInRequestQuerySchema,
 				response: {
-					200: SuccessResponseSchema(GoogleSignInResponseSchema),
 					400: z.union([ValidationErrorResponseSchema, ErrorResponseSchema]),
 				},
 				tags: ["Authentication"],
@@ -178,19 +178,18 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 		},
 		async (req, reply) => {
 			const cookieState = getOAuthState(req);
-			const { sessionId, data } =
-				await fastify.services.authService.googleSignIn(req.body, cookieState);
+			const { sessionId, redirectUrl } =
+				await fastify.services.authService.googleSignIn(req.query, cookieState);
 
 			return reply
 				.cookie(
 					config.application.sessionCookieName,
 					`${OAUTH_COOKIE_SESSION_PREFIX}${sessionId}`,
 					{
-						maxAge: config.application.sessionTTLMinutes * 60,
+						maxAge: config.application.oauthSessionTtlMinutes * 60,
 					},
 				)
-				.status(200)
-				.send({ statusCode: 200, data });
+				.redirect(redirectUrl);
 		},
 	);
 
@@ -206,7 +205,6 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 			schema: {
 				querystring: OAuth2RedirectUrlRequestQuerySchema,
 				response: {
-					// 201: SuccessResponseSchema(SignUpResponseSchema),
 					400: z.union([ValidationErrorResponseSchema, ErrorResponseSchema]),
 				},
 				tags: ["Authentication"],
@@ -227,8 +225,8 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 		},
 	);
 
-	fastify.post(
-		"/facebook",
+	fastify.get(
+		"/facebook/callback",
 		{
 			config: {
 				rateLimit: {
@@ -237,9 +235,8 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 				},
 			},
 			schema: {
-				body: GoogleSignInRequestSchema,
+				querystring: FacebookSignInRequestQuerySchema,
 				response: {
-					200: SuccessResponseSchema(GoogleSignInResponseSchema),
 					400: z.union([ValidationErrorResponseSchema, ErrorResponseSchema]),
 				},
 				tags: ["Authentication"],
@@ -247,19 +244,21 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 		},
 		async (req, reply) => {
 			const cookieState = getOAuthState(req);
-			const { sessionId, data } =
-				await fastify.services.authService.googleSignIn(req.body, cookieState);
+			const { sessionId, redirectUrl } =
+				await fastify.services.authService.facebookSignIn(
+					req.query,
+					cookieState,
+				);
 
 			return reply
 				.cookie(
 					config.application.sessionCookieName,
 					`${OAUTH_COOKIE_SESSION_PREFIX}${sessionId}`,
 					{
-						maxAge: config.application.sessionTTLMinutes * 60,
+						maxAge: config.application.oauthSessionTtlMinutes * 60,
 					},
 				)
-				.status(200)
-				.send({ statusCode: 200, data });
+				.redirect(redirectUrl);
 		},
 	);
 };

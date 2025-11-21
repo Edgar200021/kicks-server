@@ -8,6 +8,7 @@ import type { Users } from "@/common/types/db.js";
 
 declare module "fastify" {
 	export interface FastifyRequest {
+		getSession: ReturnType<typeof getSession>;
 		authenticate: ReturnType<typeof authenticate>;
 		authorize: typeof authorize;
 		user: Nullable<
@@ -19,38 +20,53 @@ declare module "fastify" {
 	}
 }
 
+function getSession(instance: FastifyInstance) {
+	return function getSession(this: FastifyRequest) {
+		let sessionValue: string | undefined;
+		let isOauth = false;
+
+		const session = this.cookies[instance.config.application.sessionCookieName];
+
+		if (session) {
+			const unsigned = this.unsignCookie(session);
+			if (!unsigned.valid) {
+				throw instance.httpErrors.unauthorized("Unauthorized");
+			}
+
+			const [_, oauthSession] = unsigned.value.split(
+				OAUTH_COOKIE_SESSION_PREFIX,
+			);
+
+			sessionValue = oauthSession || unsigned.value;
+			isOauth = !!oauthSession;
+		}
+
+		return { sessionValue, isOauth };
+	};
+}
+
 function authenticate(instance: FastifyInstance) {
 	const { sessionTTLMinutes, oauthSessionTtlMinutes, sessionCookieName } =
 		instance.config.application;
 
 	return async function (this: FastifyRequest, reply: FastifyReply) {
-		const session = this.cookies[instance.config.application.sessionCookieName];
-
-		if (!session) {
-			throw httpErrors.unauthorized("Unauthorized");
-		}
-
-		const unsigned = this.unsignCookie(session);
-		if (!unsigned.valid) {
+		const { sessionValue, isOauth } = this.getSession();
+		if (!sessionValue) {
 			throw instance.httpErrors.unauthorized("Unauthorized");
 		}
 
-		const [_, oauthSession] = unsigned.value.split(OAUTH_COOKIE_SESSION_PREFIX);
-
-		const value = oauthSession || unsigned.value;
-
 		const { id, email, firstName, role, lastName, gender } =
 			await instance.services.authService.authenticate(
-				value,
-				!oauthSession ? "regular" : "oauth2",
+				sessionValue,
+				!isOauth ? "regular" : "oauth2",
 			);
 
-		const ttl = !oauthSession ? sessionTTLMinutes : oauthSessionTtlMinutes;
-		const cookieName = !oauthSession
+		const ttl = !isOauth ? sessionTTLMinutes : oauthSessionTtlMinutes;
+		const cookieName = !isOauth
 			? sessionCookieName
 			: `${OAUTH_COOKIE_SESSION_PREFIX}${sessionCookieName}`;
 
-		reply.setCookie(cookieName, value, {
+		reply.setCookie(cookieName, sessionValue, {
 			maxAge: ttl * 60,
 		});
 
@@ -85,6 +101,7 @@ export default fp(async (fastify) => {
 		req.user = null;
 	});
 
+	fastify.decorateRequest("getSession", getSession(fastify));
 	fastify.decorateRequest("authenticate", authenticate(fastify));
 	fastify.decorateRequest("authorize", authorize);
 });

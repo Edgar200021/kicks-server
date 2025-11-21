@@ -11,10 +11,9 @@ import type { OAuth2Service } from "@/common/services/oauth2.service.js";
 import type { Nullable } from "@/common/types/common.js";
 import type { Users } from "@/common/types/db.js";
 import type { ApplicationConfig } from "@/config/config.js";
+import { facebookSignIn } from "@/features/auth/service/oauth2/facebook.js";
 import type { UsersRepository } from "@/features/users/repository/users.repository.js";
-import type { UserSchema } from "../../users/schemas/user.schema";
-import type { FacebookSignInResponse } from "../schemas/facebook-sign-in.schema.js";
-import type { GoogleSignInResponse } from "../schemas/google-sign-in.schema.js";
+import type { User } from "../../users/schemas/user.schema.js";
 import type { OAuth2RedirectUrlRequestQuery } from "../schemas/oauth2-redirect-url.js";
 import type { Session } from "../types/index.js";
 import type { OAuth2Provider } from "../types/oauth2.js";
@@ -30,6 +29,7 @@ export class AuthService {
 	verifyAccount = verifyAccount;
 	authenticate = authenticate;
 	googleSignIn = googleSignIn;
+	facebookSignIn = facebookSignIn;
 
 	constructor(
 		readonly usersRepository: UsersRepository,
@@ -39,6 +39,10 @@ export class AuthService {
 		readonly config: ApplicationConfig,
 	) {
 		this.generateSession = this.generateSession.bind(this);
+		this.generateSessionAndReturnData =
+			this.generateSessionAndReturnData.bind(this);
+		this.genereateOauth2RedirectUrl =
+			this.genereateOauth2RedirectUrl.bind(this);
 	}
 
 	async generateSession(userId: Selectable<Users>["id"], type: Session) {
@@ -94,8 +98,8 @@ export class AuthService {
 		redirectPath: Nullable<string>,
 	): Promise<{
 		sessionId: string;
-		data: UserSchema;
-		redirectUrl?: string;
+		data: User;
+		redirectUrl: string;
 	}> {
 		const sessionId = await this.generateSession(user.id, "oauth2");
 
@@ -108,9 +112,9 @@ export class AuthService {
 				lastName: user.lastName,
 				gender: user.gender,
 			},
-			...(redirectPath
-				? { redirectUrl: `${this.config.clientUrl}${redirectPath}` }
-				: {}),
+			redirectUrl: redirectPath
+				? `${this.config.clientUrl}${redirectPath}`
+				: this.config.clientUrl,
 		};
 	}
 }

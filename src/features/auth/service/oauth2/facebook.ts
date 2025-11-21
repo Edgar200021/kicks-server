@@ -1,14 +1,17 @@
-import type { FacebookSignInRequest } from "../../schemas/facebook-sign-in.schema.js";
+import type {
+	FacebookSignInRequestQuery,
+	FacebookSignInResponse,
+} from "../../schemas/facebook-sign-in.schema.js";
 import type { AuthService } from "../auth.service.js";
 
 export async function facebookSignIn(
 	this: AuthService,
-	data: FacebookSignInRequest,
+	data: FacebookSignInRequestQuery,
 	cookieState: string,
 ): Promise<{
 	sessionId: string;
-	data: FacebookSignInRequest;
-	redirectUrl?: string;
+	data: FacebookSignInResponse;
+	redirectUrl: string;
 }> {
 	const redirectPath = this.verifyOAuthState(data.state, cookieState);
 
@@ -26,10 +29,7 @@ export async function facebookSignIn(
 			isVerified: true,
 		});
 
-		return await this.generateSessionAndReturnData.bind(this)(
-			user,
-			redirectPath,
-		);
+		return await this.generateSessionAndReturnData(user, redirectPath);
 	}
 
 	if (!dbUser.googleId) {
@@ -38,8 +38,5 @@ export async function facebookSignIn(
 		});
 	}
 
-	return await this.generateSessionAndReturnData.bind(this)(
-		dbUser,
-		redirectPath,
-	);
+	return await this.generateSessionAndReturnData(dbUser, redirectPath);
 }
