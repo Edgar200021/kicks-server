@@ -23,6 +23,7 @@ const applicationConfigSchema = z.object({
 	sessionTTLMinutes: z.coerce.number().min(1440).max(43800),
 	oauthSessionTtlMinutes: z.coerce.number().min(60).max(1440),
 	oauthStateTTlMinutes: z.coerce.number().min(1).max(3),
+	resetPasswordTTLMinutes: z.coerce.number().min(5).max(10),
 	sessionCookieName: z.string().nonempty(),
 	oauthStateCookieName: z.string().nonempty(),
 	cookieSecret: z.string().min(20).nonempty(),
@@ -69,6 +70,8 @@ export const setupConfig = (): Config => {
 				process.env.APPLICATION_VERIFICATION_TOKEN_TTL_MINUTES,
 			sessionTTLMinutes: process.env.APPLICATION_SESSION_TTL_MINUTES,
 			oauthStateTTlMinutes: process.env.APPLICATION_OAUTH_STATE_TTL_MINUTES,
+			resetPasswordTTLMinutes:
+				process.env.APPLICATION_RESET_PASSWORD_TTL_MINUTES,
 			oauthSessionTtlMinutes: process.env.APPLICATION_OAUTH_SESSION_TTL_MINUTES,
 			cookieSecret: process.env.APPLICATION_COOKIE_SECRET,
 			cookieSecure: process.env.APPLICATION_COOKIE_SECURE,
@@ -116,6 +119,8 @@ export const setupConfig = (): Config => {
 			signUpLimit: process.env.RATE_LIMIT_SIGN_UP,
 			signInLimit: process.env.RATE_LIMIT_SIGN_IN,
 			accountVerificationLimit: process.env.RATE_LIMIT_ACCOUNT_VERIFICATION,
+			forgotPasswordLimit: process.env.RATE_LIMIT_FORGOT_PASSWORD,
+			resetPasswordLimit: process.env.RATE_LIMIT_RESET_PASSWORD,
 		},
 	});
 };

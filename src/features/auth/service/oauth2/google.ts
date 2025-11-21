@@ -36,7 +36,9 @@ export async function googleSignIn(
 	}
 
 	if (!dbUser.googleId) {
-		await this.usersRepository.update(dbUser.id, { googleId: googleUser.sub });
+		await this.usersRepository.updateById(dbUser.id, {
+			googleId: googleUser.sub,
+		});
 	}
 
 	return await this.generateSessionAndReturnData(dbUser, redirectPath);

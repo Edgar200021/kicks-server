@@ -33,7 +33,7 @@ export async function facebookSignIn(
 	}
 
 	if (!dbUser.googleId) {
-		await this.usersRepository.update(dbUser.id, {
+		await this.usersRepository.updateById(dbUser.id, {
 			facebookId: facebookUser.id,
 		});
 	}

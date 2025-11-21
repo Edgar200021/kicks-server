@@ -21,7 +21,7 @@ export async function verifyAccount(
 				: httpErrors.badRequest(`User is already verified`);
 	}
 
-	await this.usersRepository.update(user.id, {
+	await this.usersRepository.updateById(user.id, {
 		isVerified: true,
 	});
 }

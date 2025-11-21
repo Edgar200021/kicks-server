@@ -9,6 +9,14 @@ import {
 	ValidationErrorResponseSchema,
 } from "@/common/schemas/index.js";
 import { FacebookSignInRequestQuerySchema } from "@/features/auth/schemas/facebook-sign-in.schema.js";
+import {
+	ForgotPasswordRequestSchema,
+	ForgotPasswordResponseSchema,
+} from "@/features/auth/schemas/forgot-password.schema.js";
+import {
+	ResetPasswordRequestSchema,
+	ResetPasswordResponseSchema,
+} from "@/features/auth/schemas/reset-password.schema.js";
 import { GoogleSignInRequestQuerySchema } from "../../schemas/google-sign-in.schema.js";
 import { OAuth2RedirectUrlRequestQuerySchema } from "../../schemas/oauth2-redirect-url.js";
 import {
@@ -126,6 +134,63 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 		},
 	);
 
+	fastify.post(
+		"/forgot-password",
+		{
+			config: {
+				rateLimit: {
+					timeWindow: "1 minute",
+					max: fastify.config.rateLimit.forgotPasswordLimit,
+				},
+			},
+			schema: {
+				body: ForgotPasswordRequestSchema,
+				response: {
+					200: SuccessResponseSchema(ForgotPasswordResponseSchema),
+					400: z.union([ValidationErrorResponseSchema, ErrorResponseSchema]),
+					404: ErrorResponseSchema,
+				},
+				tags: ["Authentication"],
+			},
+		},
+		async (req, reply) => {
+			await fastify.services.authService.forgotPassword(req.body);
+			return reply.status(200).send({
+				statusCode: 200,
+				data: "If this email is registered, you will receive password reset instructions shortly.",
+			});
+		},
+	);
+
+	fastify.post(
+		"/reset-password",
+		{
+			config: {
+				rateLimit: {
+					timeWindow: "1 minute",
+					max: fastify.config.rateLimit.resetPasswordLimit,
+				},
+			},
+			schema: {
+				body: ResetPasswordRequestSchema,
+				response: {
+					200: SuccessResponseSchema(ResetPasswordResponseSchema),
+					400: z.union([ValidationErrorResponseSchema, ErrorResponseSchema]),
+				},
+				tags: ["Authentication"],
+			},
+		},
+		async (req, reply) => {
+			await fastify.services.authService.resetPassword(req.body);
+			return reply
+				.status(200)
+				.send({
+					statusCode: 200,
+					data: "Password has been reset successfully.",
+				});
+		},
+	);
+
 	fastify.get(
 		"/google",
 		{
@@ -138,7 +203,6 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 			schema: {
 				querystring: OAuth2RedirectUrlRequestQuerySchema,
 				response: {
-					// 201: SuccessResponseSchema(SignUpResponseSchema),
 					400: z.union([ValidationErrorResponseSchema, ErrorResponseSchema]),
 				},
 				tags: ["Authentication"],

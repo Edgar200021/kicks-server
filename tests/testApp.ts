@@ -4,10 +4,48 @@ import Redis from "ioredis";
 import { type Dispatcher, Headers, request } from "undici";
 import type { UndiciHeaders } from "undici/types/dispatcher.js";
 import { buildApp } from "../src/app.js";
-import { VERIFICATION_PREFIX } from "../src/common/const/index.js";
+import {
+	RESET_PASSWORD_PREFIX,
+	VERIFICATION_PREFIX,
+} from "../src/common/const/index.js";
 import { deepFreeze } from "../src/common/utils/index.js";
 import { setupConfig } from "../src/config/config.js";
+import {
+	PASSWORD_MAX_LENGTH,
+	PASSWORD_MIN_LENGTH,
+} from "../src/features/auth/const/zod.js";
 import { setupTestDb } from "./setupTestDb.js";
+
+const UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const LOWERCASE = "abcdefghijklmnopqrstuvwxyz";
+const DIGITS = "0123456789";
+const SPECIALS = "!@#$%^&*";
+
+export const generatePassword = () => {
+	const length =
+		Math.floor(
+			Math.random() * (PASSWORD_MAX_LENGTH - PASSWORD_MIN_LENGTH + 1),
+		) + PASSWORD_MIN_LENGTH;
+
+	const chars = [
+		UPPERCASE[Math.floor(Math.random() * UPPERCASE.length)],
+		LOWERCASE[Math.floor(Math.random() * LOWERCASE.length)],
+		DIGITS[Math.floor(Math.random() * DIGITS.length)],
+		SPECIALS[Math.floor(Math.random() * SPECIALS.length)],
+	];
+
+	const allChars = UPPERCASE + LOWERCASE + DIGITS + SPECIALS;
+	while (chars.length < length) {
+		chars.push(allChars[Math.floor(Math.random() * allChars.length)]);
+	}
+
+	for (let i = chars.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[chars[i], chars[j]] = [chars[j], chars[i]];
+	}
+
+	return chars.join("");
+};
 
 export type TestApp = Awaited<ReturnType<typeof createTestApp>>;
 type RequestOptions = Partial<Omit<Dispatcher.RequestOptions, "method">>;
@@ -67,6 +105,7 @@ const createTestApp = async () => {
 	config.database.name = `test-${randomUUID().toString()}`;
 
 	config.rateLimit.signUpLimit = 15;
+	config.rateLimit.resetPasswordLimit = 10;
 
 	deepFreeze(config);
 
@@ -101,18 +140,33 @@ const createTestApp = async () => {
 				.at(-1);
 		},
 
+		async getResetPasswordToken() {
+			return (await redis.keys("*"))
+				.filter((key) => key.startsWith(RESET_PASSWORD_PREFIX))
+				.at(-1)
+				?.split(RESET_PASSWORD_PREFIX)
+				.at(-1);
+		},
+
+		async deleteResetPasswordToken() {
+			const token = await this.getResetPasswordToken();
+			if (!token) return;
+
+			await redis.del(`${RESET_PASSWORD_PREFIX}${token}`);
+		},
+
 		async signUp(options?: RequestOptions) {
 			return request(`${address}/api/v1/auth/sign-up`, {
-				method: "POST",
 				...options,
+				method: "POST",
 				headers: buildHeaders(options?.headers),
 			});
 		},
 
 		async signIn(options?: RequestOptions) {
 			return request(`${address}/api/v1/auth/sign-in`, {
-				method: "POST",
 				...options,
+				method: "POST",
 				headers: buildHeaders(options?.headers),
 			});
 		},
@@ -128,6 +182,7 @@ const createTestApp = async () => {
 		async createAndVerify(options?: RequestOptions) {
 			const response = await this.signUp(options);
 			if (response.statusCode !== 201) {
+				console.log(response);
 				throw new Error("Failed to signup");
 			}
 
@@ -135,7 +190,7 @@ const createTestApp = async () => {
 			return this.verifyAccount({ body: JSON.stringify({ token }) });
 		},
 
-		async createAndSignIn(options?: RequestOptions) {
+		async createAndSignIn(options?: RequestOptions): Promise<string> {
 			const response = await this.createAndVerify(options);
 			if (response.statusCode !== 200) {
 				throw new Error("Failed to signup and verify");
@@ -160,6 +215,22 @@ const createTestApp = async () => {
 			}
 
 			return cookie;
+		},
+
+		async forgotPassword(options?: RequestOptions) {
+			return request(`${address}/api/v1/auth/forgot-password`, {
+				...options,
+				method: "POST",
+				headers: buildHeaders(options?.headers),
+			});
+		},
+
+		async resetPassword(options?: RequestOptions) {
+			return request(`${address}/api/v1/auth/reset-password`, {
+				...options,
+				method: "POST",
+				headers: buildHeaders(options?.headers),
+			});
 		},
 	};
 };

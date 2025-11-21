@@ -38,7 +38,7 @@ export class EmailService {
 		onError?: (err: unknown) => void,
 	) {
 		const subject = "Password Reset";
-		const url = `${this.config.clientUrl}${this.config.clientResetPasswordPath}?token=${encodeURIComponent(token)}`;
+		const url = `${this.config.clientUrl}${this.config.clientResetPasswordPath}?token=${encodeURIComponent(token)}&email=${to}`;
 
 		const text = `Please click the link to reset your password: ${url}`;
 		const html = `<p>Please click the link to reset your password: <a href="${url}">${url}</a></p>`;

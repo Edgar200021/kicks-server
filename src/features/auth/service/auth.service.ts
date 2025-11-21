@@ -11,7 +11,9 @@ import type { OAuth2Service } from "@/common/services/oauth2.service.js";
 import type { Nullable } from "@/common/types/common.js";
 import type { Users } from "@/common/types/db.js";
 import type { ApplicationConfig } from "@/config/config.js";
+import { forgotPassword } from "@/features/auth/service/forgot-password.js";
 import { facebookSignIn } from "@/features/auth/service/oauth2/facebook.js";
+import { resetPassword } from "@/features/auth/service/reset-password.js";
 import type { UsersRepository } from "@/features/users/repository/users.repository.js";
 import type { User } from "../../users/schemas/user.schema.js";
 import type { OAuth2RedirectUrlRequestQuery } from "../schemas/oauth2-redirect-url.js";
@@ -30,6 +32,8 @@ export class AuthService {
 	authenticate = authenticate;
 	googleSignIn = googleSignIn;
 	facebookSignIn = facebookSignIn;
+	forgotPassword = forgotPassword;
+	resetPassword = resetPassword;
 
 	constructor(
 		readonly usersRepository: UsersRepository,

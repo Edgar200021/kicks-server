@@ -11,6 +11,8 @@ export const rateLimitConfigSchema = z.object({
 		.max(5)
 		.default(3)
 		.optional(),
+	forgotPasswordLimit: z.coerce.number().min(3).max(5).default(5),
+	resetPasswordLimit: z.coerce.number().min(3).max(5).default(5),
 });
 
 export type RateLimitConfig = z.infer<typeof rateLimitConfigSchema>;

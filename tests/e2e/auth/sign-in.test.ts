@@ -4,12 +4,12 @@ import {
 	PASSWORD_MAX_LENGTH,
 	PASSWORD_MIN_LENGTH,
 } from "../../../src/features/auth/const/index.js";
-import { omit, withTestApp } from "../../testApp.js";
+import { generatePassword, omit, withTestApp } from "../../testApp.js";
 
 describe("Authentication", () => {
 	const signUpData = {
 		email: faker.internet.email(),
-		password: faker.internet.password({ length: PASSWORD_MIN_LENGTH }),
+		password: generatePassword(),
 		firstName: faker.person.firstName(),
 		lastName: faker.person.lastName(),
 		gender: faker.person.sexType(),
@@ -17,7 +17,7 @@ describe("Authentication", () => {
 
 	const signInData = {
 		email: faker.internet.email(),
-		password: faker.internet.password({ length: PASSWORD_MIN_LENGTH }),
+		password: generatePassword(),
 	};
 
 	describe("Sign In", () => {

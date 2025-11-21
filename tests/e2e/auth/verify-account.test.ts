@@ -1,15 +1,12 @@
 import { faker } from "@faker-js/faker";
 import { describe, expect, it } from "vitest";
-import {
-	PASSWORD_MIN_LENGTH,
-	VERIFICATION_TOKEN_MAX_LENGTH,
-} from "../../../src/features/auth/const/index.js";
-import { withTestApp } from "../../testApp.js";
+import { VERIFICATION_TOKEN_MAX_LENGTH } from "../../../src/features/auth/const/index.js";
+import { generatePassword, withTestApp } from "../../testApp.js";
 
 describe("Authentication", () => {
 	const signUpData = {
 		email: faker.internet.email(),
-		password: faker.internet.password({ length: PASSWORD_MIN_LENGTH }),
+		password: generatePassword(),
 		firstName: faker.person.firstName(),
 		lastName: faker.person.lastName(),
 		gender: faker.person.sexType(),
