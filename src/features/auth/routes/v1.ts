@@ -17,20 +17,21 @@ import {
 	ResetPasswordRequestSchema,
 	ResetPasswordResponseSchema,
 } from "@/features/auth/schemas/reset-password.schema.js";
-import { GoogleSignInRequestQuerySchema } from "../../schemas/google-sign-in.schema.js";
-import { OAuth2RedirectUrlRequestQuerySchema } from "../../schemas/oauth2-redirect-url.js";
+import { UserSchema } from "@/features/users/schemas/user.schema.js";
+import { GoogleSignInRequestQuerySchema } from "../schemas/google-sign-in.schema.js";
+import { OAuth2RedirectUrlRequestQuerySchema } from "../schemas/oauth2-redirect-url.js";
 import {
 	SignInRequestSchema,
 	SignInResponseSchema,
-} from "../../schemas/sign-in.schema.js";
+} from "../schemas/sign-in.schema.js";
 import {
 	SignUpRequestSchema,
 	SignUpResponseSchema,
-} from "../../schemas/sign-up.schema.js";
+} from "../schemas/sign-up.schema.js";
 import {
 	VerifyAccountRequestSchema,
 	VerifyAccountResponseSchema,
-} from "../../schemas/verify-account.schema.js";
+} from "../schemas/verify-account.schema.js";
 
 export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 	const { config } = fastify;
@@ -182,12 +183,10 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 		},
 		async (req, reply) => {
 			await fastify.services.authService.resetPassword(req.body);
-			return reply
-				.status(200)
-				.send({
-					statusCode: 200,
-					data: "Password has been reset successfully.",
-				});
+			return reply.status(200).send({
+				statusCode: 200,
+				data: "Password has been reset successfully.",
+			});
 		},
 	);
 
@@ -323,6 +322,72 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 					},
 				)
 				.redirect(redirectUrl);
+		},
+	);
+
+	fastify.get(
+		"/me",
+		{
+			onRequest: async (req, reply) => await req.authenticate(reply),
+			schema: {
+				response: {
+					200: SuccessResponseSchema(UserSchema),
+				},
+			},
+		},
+		async (req, reply) => {
+			if (!req.user) {
+				throw httpErrors.unauthorized("Unauthorized");
+			}
+
+			return reply.status(200).send({
+				statusCode: 200,
+				data: {
+					email: req.user.email,
+					firstName: req.user.firstName,
+					lastName: req.user.lastName,
+					gender: req.user.gender,
+					role: req.user.role,
+				},
+			});
+		},
+	);
+
+	fastify.post(
+		"/logout",
+		{
+			onRequest: async (req, reply) => await req.authenticate(reply),
+			config: {
+				rateLimit: {
+					timeWindow: "1 minute",
+					max: fastify.config.rateLimit.logoutLimit,
+				},
+			},
+			schema: {
+				response: {
+					204: SuccessResponseSchema(z.null()),
+					401: ErrorResponseSchema,
+				},
+				tags: ["Authentication"],
+			},
+		},
+		async (req, reply) => {
+			const { sessionValue } = req.getSession();
+			if (!sessionValue) {
+				throw httpErrors.unauthorized("Unauthorized");
+			}
+
+			await fastify.services.authService.logout(sessionValue);
+
+			return reply
+				.clearCookie(config.application.sessionCookieName, {
+					maxAge: 0,
+				})
+				.status(204)
+				.send({
+					statusCode: 204,
+					data: null,
+				});
 		},
 	);
 };

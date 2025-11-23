@@ -121,6 +121,7 @@ export const setupConfig = (): Config => {
 			accountVerificationLimit: process.env.RATE_LIMIT_ACCOUNT_VERIFICATION,
 			forgotPasswordLimit: process.env.RATE_LIMIT_FORGOT_PASSWORD,
 			resetPasswordLimit: process.env.RATE_LIMIT_RESET_PASSWORD,
+			logoutLimit: process.env.RATE_LIMIT_LOGOUT,
 		},
 	});
 };

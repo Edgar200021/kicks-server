@@ -20,7 +20,7 @@ describe("Authentication", () => {
 				});
 				expect(signupRes.statusCode).toBe(201);
 
-				const token = await app.getVerificationToken();
+				const token = await app.getRedisToken("verification");
 
 				const verifyRes = await app.verifyAccount({
 					body: JSON.stringify({ token }),
@@ -36,7 +36,7 @@ describe("Authentication", () => {
 				});
 				expect(signupRes.statusCode).toBe(201);
 
-				const token = await app.getVerificationToken();
+				const token = await app.getRedisToken("verification");
 
 				const verifyRes = await app.verifyAccount({
 					body: JSON.stringify({ token }),
@@ -96,7 +96,7 @@ describe("Authentication", () => {
 				});
 				expect(signupRes.statusCode).toBe(201);
 
-				const token = await app.getVerificationToken();
+				const token = await app.getRedisToken("verification");
 
 				const verifyRes = await app.verifyAccount({
 					body: JSON.stringify({ token }),
@@ -117,7 +117,7 @@ describe("Authentication", () => {
 				});
 				expect(signupRes.statusCode).toBe(201);
 
-				const token = await app.getVerificationToken();
+				const token = await app.getRedisToken("verification");
 
 				await app.db
 					.updateTable("users")
@@ -139,7 +139,7 @@ describe("Authentication", () => {
 				});
 				expect(signupRes.statusCode).toBe(201);
 
-				const token = await app.getVerificationToken();
+				const token = await app.getRedisToken("verification");
 
 				await app.db
 					.deleteFrom("users")

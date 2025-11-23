@@ -1,0 +1,3 @@
+export const GET_ALL_USERS_MAX_LIMIT = 100;
+export const GET_ALL_USERS_DEFAULT_LIMIT = 30;
+export const GET_ALL_USERS_SEARCH_MAX_LENGTH = 70;

@@ -41,14 +41,14 @@ export const FacebookOAuth2UserSchema = z.object({
 	last_name: z.string().nonempty(),
 	gender: z
 		.string()
-		.nonempty()
 		.transform((gender) =>
 			gender === "male"
 				? UserGender.Male
 				: gender === "female"
 					? UserGender.Female
 					: undefined,
-		),
+		)
+		.optional(),
 });
 
 export type GoogleOAuth2User = z.infer<typeof GoogleUserSchema>;

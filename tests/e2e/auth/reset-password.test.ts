@@ -26,7 +26,7 @@ describe("Authentication", () => {
 				});
 				expect(forgotRes.statusCode).toEqual(200);
 
-				const token = await app.getResetPasswordToken();
+				const token = await app.getRedisToken("reset-password");
 				const res = await app.resetPassword({
 					body: JSON.stringify({
 						email: signUpData.email,
@@ -53,7 +53,7 @@ describe("Authentication", () => {
 				});
 				expect(forgotRes.statusCode).toEqual(200);
 
-				const token = await app.getResetPasswordToken();
+				const token = await app.getRedisToken("reset-password");
 				const password = generatePassword();
 
 				const res = await app.resetPassword({
@@ -141,7 +141,7 @@ describe("Authentication", () => {
 				});
 				expect(forgotRes.statusCode).toEqual(200);
 
-				const token = await app.getResetPasswordToken();
+				const token = await app.getRedisToken("reset-password");
 
 				for (let i = 0; i < 3; i++) {
 					if (i === 1) {

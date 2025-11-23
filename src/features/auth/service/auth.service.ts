@@ -12,6 +12,7 @@ import type { Nullable } from "@/common/types/common.js";
 import type { Users } from "@/common/types/db.js";
 import type { ApplicationConfig } from "@/config/config.js";
 import { forgotPassword } from "@/features/auth/service/forgot-password.js";
+import { logout } from "@/features/auth/service/logout.js";
 import { facebookSignIn } from "@/features/auth/service/oauth2/facebook.js";
 import { resetPassword } from "@/features/auth/service/reset-password.js";
 import type { UsersRepository } from "@/features/users/repository/users.repository.js";
@@ -34,13 +35,14 @@ export class AuthService {
 	facebookSignIn = facebookSignIn;
 	forgotPassword = forgotPassword;
 	resetPassword = resetPassword;
+	logout = logout;
 
 	constructor(
-		readonly usersRepository: UsersRepository,
-		readonly emailService: EmailService,
-		readonly oauth2Service: OAuth2Service,
-		readonly redis: Redis,
-		readonly config: ApplicationConfig,
+		protected readonly usersRepository: UsersRepository,
+		protected readonly emailService: EmailService,
+		protected readonly oauth2Service: OAuth2Service,
+		protected readonly redis: Redis,
+		protected readonly config: ApplicationConfig,
 	) {
 		this.generateSession = this.generateSession.bind(this);
 		this.generateSessionAndReturnData =

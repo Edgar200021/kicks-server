@@ -6,14 +6,17 @@ import type { UndiciHeaders } from "undici/types/dispatcher.js";
 import { buildApp } from "../src/app.js";
 import {
 	RESET_PASSWORD_PREFIX,
+	SESSION_PREFIX,
 	VERIFICATION_PREFIX,
 } from "../src/common/const/index.js";
+import { UserRole } from "../src/common/types/db.js";
 import { deepFreeze } from "../src/common/utils/index.js";
 import { setupConfig } from "../src/config/config.js";
 import {
 	PASSWORD_MAX_LENGTH,
 	PASSWORD_MIN_LENGTH,
 } from "../src/features/auth/const/zod.js";
+import type { SignUpRequest } from "../src/features/auth/schemas/sign-up.schema.js";
 import { setupTestDb } from "./setupTestDb.js";
 
 const UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -132,24 +135,23 @@ const createTestApp = async () => {
 		rateLimitConfig: config.rateLimit,
 		applicationConfig: config.application,
 
-		async getVerificationToken() {
-			return (await redis.keys("*"))
-				.filter((key) => key.startsWith(VERIFICATION_PREFIX))
-				.at(-1)
-				?.split(VERIFICATION_PREFIX)
-				.at(-1);
-		},
+		async getRedisToken(type: "verification" | "reset-password" | "session") {
+			const key =
+				type === "verification"
+					? VERIFICATION_PREFIX
+					: type === "reset-password"
+						? RESET_PASSWORD_PREFIX
+						: SESSION_PREFIX;
 
-		async getResetPasswordToken() {
 			return (await redis.keys("*"))
-				.filter((key) => key.startsWith(RESET_PASSWORD_PREFIX))
+				.filter((key) => key.startsWith(key))
 				.at(-1)
-				?.split(RESET_PASSWORD_PREFIX)
+				?.split(key)
 				.at(-1);
 		},
 
 		async deleteResetPasswordToken() {
-			const token = await this.getResetPasswordToken();
+			const token = await this.getRedisToken("reset-password");
 			if (!token) return;
 
 			await redis.del(`${RESET_PASSWORD_PREFIX}${token}`);
@@ -179,14 +181,22 @@ const createTestApp = async () => {
 			});
 		},
 
+		async logout(options?: RequestOptions) {
+			return request(`${address}/api/v1/auth/logout`, {
+				...options,
+				method: "POST",
+				headers: buildHeaders(options?.headers),
+				body: JSON.stringify({}),
+			});
+		},
+
 		async createAndVerify(options?: RequestOptions) {
 			const response = await this.signUp(options);
 			if (response.statusCode !== 201) {
-				console.log(response);
 				throw new Error("Failed to signup");
 			}
 
-			const token = await this.getVerificationToken();
+			const token = await this.getRedisToken("verification");
 			return this.verifyAccount({ body: JSON.stringify({ token }) });
 		},
 
@@ -214,7 +224,20 @@ const createTestApp = async () => {
 				throw new Error("Session is empty");
 			}
 
-			return cookie;
+			return sessionCookie;
+		},
+
+		async createAdminUser(body: SignUpRequest) {
+			const session = await this.createAndSignIn({
+				body: JSON.stringify(body),
+			});
+			await db
+				.updateTable("users")
+				.set({ role: UserRole.Admin })
+				.where("email", "=", body.email)
+				.executeTakeFirstOrThrow();
+
+			return session;
 		},
 
 		async forgotPassword(options?: RequestOptions) {
@@ -229,6 +252,16 @@ const createTestApp = async () => {
 			return request(`${address}/api/v1/auth/reset-password`, {
 				...options,
 				method: "POST",
+				headers: buildHeaders(options?.headers),
+			});
+		},
+
+		//Admin routes
+
+		async getAllUsers(options?: RequestOptions) {
+			return request(`${address}/api/v1/admin/user`, {
+				...options,
+				method: "GET",
 				headers: buildHeaders(options?.headers),
 			});
 		},
