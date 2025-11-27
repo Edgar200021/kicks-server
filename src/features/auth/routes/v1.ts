@@ -102,6 +102,7 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 				req.body,
 				sessionValue,
 			);
+
 			return reply
 				.status(200)
 				.cookie(config.application.sessionCookieName, sessionId, {
@@ -216,7 +217,7 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 
 			return reply
 				.setCookie(config.application.oauthStateCookieName, cookieState, {
-					maxAge: config.application.oauthStateTTlMinutes * 60,
+					maxAge: config.application.oauthStateTTLMinutes * 60,
 				})
 				.redirect(url);
 		},
@@ -249,7 +250,7 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 					config.application.sessionCookieName,
 					`${OAUTH_COOKIE_SESSION_PREFIX}${sessionId}`,
 					{
-						maxAge: config.application.oauthSessionTtlMinutes * 60,
+						maxAge: config.application.oauthSessionTTLMinutes * 60,
 					},
 				)
 				.redirect(redirectUrl);
@@ -282,7 +283,7 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 
 			return reply
 				.setCookie(config.application.oauthStateCookieName, cookieState, {
-					maxAge: config.application.oauthStateTTlMinutes * 60,
+					maxAge: config.application.oauthStateTTLMinutes * 60,
 				})
 				.redirect(url);
 		},
@@ -318,7 +319,7 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 					config.application.sessionCookieName,
 					`${OAUTH_COOKIE_SESSION_PREFIX}${sessionId}`,
 					{
-						maxAge: config.application.oauthSessionTtlMinutes * 60,
+						maxAge: config.application.oauthSessionTTLMinutes * 60,
 					},
 				)
 				.redirect(redirectUrl);

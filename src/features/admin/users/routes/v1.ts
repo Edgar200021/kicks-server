@@ -1,8 +1,11 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import z from "zod";
 import { ErrorResponseSchema } from "@/common/schemas/error-response.schema.js";
 import { SuccessResponseSchema } from "@/common/schemas/success-response.schema.js";
 import { ValidationErrorResponseSchema } from "@/common/schemas/validation-error-response.schema.js";
+import {
+	BlockToggleRequestParamsSchema,
+	BlockToggleResponseSchema,
+} from "@/features/admin/users/schemas/block-toggle.schema.js";
 import {
 	GetAllUsersRequestQuerySchema,
 	GetAllUsersResponseSchema,
@@ -18,7 +21,9 @@ export const adminUsersRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 				querystring: GetAllUsersRequestQuerySchema,
 				response: {
 					200: SuccessResponseSchema(GetAllUsersResponseSchema),
-					400: z.union([ValidationErrorResponseSchema, ErrorResponseSchema]),
+					400: ValidationErrorResponseSchema,
+					401: ErrorResponseSchema,
+					403: ErrorResponseSchema,
 				},
 			},
 		},
@@ -27,10 +32,31 @@ export const adminUsersRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 
 			return reply.status(200).send({
 				statusCode: 200,
-				data: {
-					pageCount: data.pageCount,
-					users: data.users,
+				data,
+			});
+		},
+	);
+
+	fastify.patch(
+		"/:id/block-toggle",
+		{
+			schema: {
+				params: BlockToggleRequestParamsSchema,
+				response: {
+					200: SuccessResponseSchema(BlockToggleResponseSchema),
+					400: ValidationErrorResponseSchema,
+					401: ErrorResponseSchema,
+					403: ErrorResponseSchema,
+					404: ErrorResponseSchema,
 				},
+			},
+		},
+		async (req, reply) => {
+			await adminUsersService.blockToggle(req.params);
+
+			return reply.status(200).send({
+				statusCode: 200,
+				data: null,
 			});
 		},
 	);

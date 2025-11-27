@@ -53,6 +53,16 @@ function buildFilters(
 ): ExpressionWrapper<DB, "users", SqlBool> {
 	const ands: OperandExpression<SqlBool>[] = [];
 
+	if (query.startDate) {
+		//@ts-expect-error
+		ands.push(eb("createdAt", ">=", query.startDate.toISOString()));
+	}
+
+	if (query.endDate) {
+		//@ts-expect-error
+		ands.push(eb("createdAt", "<=", query.endDate.toISOString()));
+	}
+
 	if (query.isBanned !== undefined) {
 		ands.push(eb("isBanned", "=", query.isBanned));
 	}

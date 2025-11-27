@@ -56,7 +56,7 @@ export class AuthService {
 		const ttl =
 			type === "regular"
 				? this.config.sessionTTLMinutes
-				: this.config.oauthSessionTtlMinutes;
+				: this.config.oauthSessionTTLMinutes;
 
 		await this.redis.setex(`${SESSION_PREFIX}${id}`, ttl * 60, userId);
 

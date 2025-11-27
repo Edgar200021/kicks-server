@@ -19,8 +19,8 @@ export const GoogleUserSchema = z.object({
 	sub: z.string().nonempty(),
 	email: z.email().nonempty(),
 	email_verified: z.boolean(),
-	given_name: z.string(),
-	family_name: z.string(),
+	given_name: z.string().optional(),
+	family_name: z.string().optional(),
 });
 
 export const FacebookOAuth2AccessTokenSchema = z.union([

@@ -10,11 +10,7 @@ export async function deleteNotVerified(
 		.where((eb) =>
 			eb.and([
 				eb("isVerified", "=", false),
-				eb(
-					"createdAt",
-					"<",
-					sql<Date>`timezone('utc', now()) - INTERVAL '1 day'`,
-				),
+				eb("createdAt", "<", sql<Date>`now() - INTERVAL '1 day'`),
 			]),
 		)
 		.returning(["id"])

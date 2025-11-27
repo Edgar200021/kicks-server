@@ -13,7 +13,7 @@ export async function authenticate(
 	const ttl =
 		type === "regular"
 			? this.config.sessionTTLMinutes
-			: this.config.oauthSessionTtlMinutes;
+			: this.config.oauthSessionTTLMinutes;
 
 	const userId = await this.redis.getex(
 		`${SESSION_PREFIX}${session}`,

@@ -46,7 +46,7 @@ function getSession(instance: FastifyInstance) {
 }
 
 function authenticate(instance: FastifyInstance) {
-	const { sessionTTLMinutes, oauthSessionTtlMinutes, sessionCookieName } =
+	const { sessionTTLMinutes, oauthSessionTTLMinutes, sessionCookieName } =
 		instance.config.application;
 
 	return async function (this: FastifyRequest, reply: FastifyReply) {
@@ -61,12 +61,12 @@ function authenticate(instance: FastifyInstance) {
 				!isOauth ? "regular" : "oauth2",
 			);
 
-		const ttl = !isOauth ? sessionTTLMinutes : oauthSessionTtlMinutes;
-		const cookieName = !isOauth
-			? sessionCookieName
-			: `${OAUTH_COOKIE_SESSION_PREFIX}${sessionCookieName}`;
+		const ttl = !isOauth ? sessionTTLMinutes : oauthSessionTTLMinutes;
+		const value = !isOauth
+			? sessionValue
+			: `${OAUTH_COOKIE_SESSION_PREFIX}${sessionValue}`;
 
-		reply.setCookie(cookieName, sessionValue, {
+		reply.setCookie(sessionCookieName, value, {
 			maxAge: ttl * 60,
 		});
 

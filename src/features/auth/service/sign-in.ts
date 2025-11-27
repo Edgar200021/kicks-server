@@ -13,13 +13,23 @@ export async function signIn(
 	session?: string,
 ): Promise<{ sessionId: string; data: SignInResponse }> {
 	const user = await this.usersRepository.getByEmail(data.email);
-	if (!user || !(await compare(data.password, user.password ?? ""))) {
-		throw httpErrors.badRequest(`Invalid credentials`);
+
+	if (!user || !user.password) {
+		throw httpErrors.badRequest(
+			!user
+				? "Invalid credentials"
+				: "This account uses OAuth. Please sign in via OAuth provider",
+		);
+	}
+
+	const isPasswordValid = await compare(data.password, user.password);
+	if (!isPasswordValid) {
+		throw httpErrors.badRequest("Invalid credentials");
 	}
 
 	if (!user.isVerified || user.isBanned) {
 		throw httpErrors.badRequest(
-			!user.isVerified ? `Account is not verified` : "User is banned",
+			!user.isVerified ? "Account is not verified" : "User is banned",
 		);
 	}
 

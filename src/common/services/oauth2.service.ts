@@ -16,7 +16,7 @@ import {
 	GoogleAccessTokenSchema,
 	type GoogleOAuth2User,
 	GoogleUserSchema,
-} from "../schemas/oauth2.js";
+} from "../schemas/oauth2.schema.js";
 
 export class OAuth2Service {
 	constructor(private readonly config: ApplicationConfig) {}

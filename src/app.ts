@@ -11,6 +11,7 @@ import {
 	serializerCompiler,
 	validatorCompiler,
 } from "fastify-type-provider-zod";
+import { adminRoutesV1 } from "@/features/admin/routes/v1.js";
 import { setupServices } from "@/features/index.js";
 import {
 	setupDatabaseClient,
@@ -20,7 +21,6 @@ import {
 import type { ApplicationConfig, Config } from "./config/config.js";
 import { authRoutesV1 } from "./features/auth/routes/v1.js";
 import { usersRoutesV1 } from "./features/users/routes/v1.js";
-import { adminRoutesV1 } from "@/features/admin/routes/v1.js";
 
 const loggerOptions = (
 	config: ApplicationConfig,

@@ -21,8 +21,8 @@ const applicationConfigSchema = z.object({
 	clientResetPasswordPath: z.string().trim().nonempty(),
 	verificationTokenTTLMinutes: z.coerce.number().min(60).max(1440),
 	sessionTTLMinutes: z.coerce.number().min(1440).max(43800),
-	oauthSessionTtlMinutes: z.coerce.number().min(60).max(1440),
-	oauthStateTTlMinutes: z.coerce.number().min(1).max(3),
+	oauthSessionTTLMinutes: z.coerce.number().min(60).max(1440),
+	oauthStateTTLMinutes: z.coerce.number().min(1).max(3),
 	resetPasswordTTLMinutes: z.coerce.number().min(5).max(10),
 	sessionCookieName: z.string().nonempty(),
 	oauthStateCookieName: z.string().nonempty(),
@@ -69,10 +69,10 @@ export const setupConfig = (): Config => {
 			verificationTokenTTLMinutes:
 				process.env.APPLICATION_VERIFICATION_TOKEN_TTL_MINUTES,
 			sessionTTLMinutes: process.env.APPLICATION_SESSION_TTL_MINUTES,
-			oauthStateTTlMinutes: process.env.APPLICATION_OAUTH_STATE_TTL_MINUTES,
+			oauthStateTTLMinutes: process.env.APPLICATION_OAUTH_STATE_TTL_MINUTES,
 			resetPasswordTTLMinutes:
 				process.env.APPLICATION_RESET_PASSWORD_TTL_MINUTES,
-			oauthSessionTtlMinutes: process.env.APPLICATION_OAUTH_SESSION_TTL_MINUTES,
+			oauthSessionTTLMinutes: process.env.APPLICATION_OAUTH_SESSION_TTL_MINUTES,
 			cookieSecret: process.env.APPLICATION_COOKIE_SECRET,
 			cookieSecure: process.env.APPLICATION_COOKIE_SECURE,
 			sessionCookieName: process.env.APPLICATION_SESSION_COOKIE_NAME,

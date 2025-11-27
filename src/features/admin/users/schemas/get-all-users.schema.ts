@@ -21,12 +21,19 @@ export const GetAllUsersRequestQuerySchema = z
 			.optional(),
 		search: z.string().max(GET_ALL_USERS_SEARCH_MAX_LENGTH).optional(),
 		gender: z.enum(UserGender).optional(),
+		startDate: z.coerce.date().optional(),
+		endDate: z.coerce.date().optional(),
 	})
 	.and(
 		PaginationSchema({
 			maxLimit: GET_ALL_USERS_MAX_LIMIT,
 			defaultLimit: GET_ALL_USERS_DEFAULT_LIMIT,
 		}),
+	)
+	.refine((obj) =>
+		!obj.startDate || !obj.endDate
+			? true
+			: obj.endDate.getTime() < obj.startDate.getTime(),
 	);
 
 export const GetAllUsersResponseSchema = z
