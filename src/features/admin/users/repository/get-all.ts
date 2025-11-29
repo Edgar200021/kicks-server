@@ -54,13 +54,11 @@ function buildFilters(
 	const ands: OperandExpression<SqlBool>[] = [];
 
 	if (query.startDate) {
-		//@ts-expect-error
-		ands.push(eb("createdAt", ">=", query.startDate.toISOString()));
+		ands.push(eb("createdAt", ">=", query.startDate));
 	}
 
 	if (query.endDate) {
-		//@ts-expect-error
-		ands.push(eb("createdAt", "<=", query.endDate.toISOString()));
+		ands.push(eb("createdAt", "<=", query.endDate));
 	}
 
 	if (query.isBanned !== undefined) {

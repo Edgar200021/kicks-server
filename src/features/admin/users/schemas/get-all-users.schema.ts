@@ -33,7 +33,7 @@ export const GetAllUsersRequestQuerySchema = z
 	.refine((obj) =>
 		!obj.startDate || !obj.endDate
 			? true
-			: obj.endDate.getTime() < obj.startDate.getTime(),
+			: obj.endDate.getTime() > obj.startDate.getTime(),
 	);
 
 export const GetAllUsersResponseSchema = z

@@ -1,5 +1,5 @@
 import { httpErrors } from "@fastify/sensible";
-import type { AdminUsersService } from "@/features/admin/users/service/users.service.js";
+import type { AdminUsersService } from "@/features/admin/users/service/admin-users.service.js";
 import type { BlockToggleRequestParams } from "../schemas/block-toggle.schema.js";
 
 export async function blockToggle(

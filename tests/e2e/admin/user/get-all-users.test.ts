@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { Headers } from "undici";
 import { describe, expect, it } from "vitest";
+import { UserRole } from "../../../../src/common/types/db.js";
 import { GET_ALL_USERS_SEARCH_MAX_LENGTH } from "../../../../src/features/admin/users/const/zod";
 import { generatePassword, withTestApp } from "../../../testApp.js";
 
@@ -89,6 +90,25 @@ describe("Authentication", () => {
 							}),
 						},
 					},
+					{
+						name: "invalid startDate",
+						data: {
+							startDate: "invalid date",
+						},
+					},
+					{
+						name: "invalid endDate",
+						data: {
+							startDate: "invalid date",
+						},
+					},
+					{
+						name: "startDate greater than endDate",
+						data: {
+							startDate: new Date(new Date().getMilliseconds() + 1000),
+							endDate: new Date(),
+						},
+					},
 				];
 
 				await Promise.all(
@@ -103,6 +123,30 @@ describe("Authentication", () => {
 						expect(res.statusCode, `${name} → wrong status`).toBe(400);
 					}),
 				);
+			});
+		});
+
+		it("Should return 401 status code user is not authenticated", async () => {
+			await withTestApp(async (app) => {
+				const res = await app.getAllUsers({});
+
+				expect(res.statusCode).toEqual(401);
+			});
+		});
+
+		it(`Should return 403 status code user role is not ${UserRole.Admin}`, async () => {
+			await withTestApp(async (app) => {
+				const session = await app.createAndSignIn({
+					body: JSON.stringify(signUpData),
+				});
+
+				const res = await app.getAllUsers({
+					headers: new Headers({
+						Cookie: session,
+					}),
+				});
+
+				expect(res.statusCode).toEqual(403);
 			});
 		});
 	});

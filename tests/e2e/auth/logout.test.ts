@@ -63,7 +63,7 @@ describe("Authentication", () => {
 			});
 		});
 
-		it("Should return 401 status code user is not authorized", async () => {
+		it("Should return 401 status code user is not authenticated", async () => {
 			await withTestApp(async (app) => {
 				const res = await app.logout({});
 

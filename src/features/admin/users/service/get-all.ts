@@ -1,4 +1,4 @@
-import type { AdminUsersService } from "@/features/admin/users/service/users.service.js";
+import type { AdminUsersService } from "@/features/admin/users/service/admin-users.service.js";
 import type {
 	GetAllUsersRequestQuery,
 	GetAllUsersResponse,

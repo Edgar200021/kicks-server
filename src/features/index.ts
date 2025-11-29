@@ -7,7 +7,7 @@ import { OAuth2Service } from "@/common/services/oauth2.service.js";
 import type { DB } from "@/common/types/db.js";
 import type { ApplicationConfig } from "@/config/config.js";
 import { AdminUsersRepository } from "@/features/admin/users/repository/users.repository.js";
-import { AdminUsersService } from "@/features/admin/users/service/users.service.js";
+import { AdminUsersService } from "@/features/admin/users/service/admin-users.service.js";
 import { AuthService } from "@/features/auth/service/auth.service.js";
 import { UsersRepository } from "@/features/users/repository/users.repository.js";
 import { UsersService } from "@/features/users/service/users.service.js";

@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { RedisContainer } from "@testcontainers/redis";
 import Redis from "ioredis";
+import type { Selectable } from "kysely";
 import { type Dispatcher, Headers, request } from "undici";
 import type { UndiciHeaders } from "undici/types/dispatcher.js";
 import { buildApp } from "../src/app.js";
@@ -9,7 +10,7 @@ import {
 	SESSION_PREFIX,
 	VERIFICATION_PREFIX,
 } from "../src/common/const/index.js";
-import { UserRole } from "../src/common/types/db.js";
+import { UserRole, type Users } from "../src/common/types/db.js";
 import { deepFreeze } from "../src/common/utils/index.js";
 import { setupConfig } from "../src/config/config.js";
 import {
@@ -262,6 +263,18 @@ const createTestApp = async () => {
 			return request(`${address}/api/v1/admin/user`, {
 				...options,
 				method: "GET",
+				headers: buildHeaders(options?.headers),
+			});
+		},
+
+		async blockToggle(
+			userId: Selectable<Users>["id"],
+			options?: RequestOptions,
+		) {
+			return request(`${address}/api/v1/admin/user/${userId}/block-toggle`, {
+				...options,
+				method: "PATCH",
+				body: JSON.stringify({}),
 				headers: buildHeaders(options?.headers),
 			});
 		},
