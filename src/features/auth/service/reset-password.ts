@@ -16,13 +16,13 @@ export async function resetPassword(
 		throw httpErrors.badRequest("Invalid request.");
 	}
 
-	const user = await this.usersRepository.getById(userId);
+	const user = await this.userRepository.getById(userId);
 	if (!user || user.email !== data.email) {
 		throw httpErrors.badRequest("Invalid request");
 	}
 
 	const hashedPassword = await scryptHash(data.password);
-	await this.usersRepository.updateById(user.id, {
+	await this.userRepository.updateById(user.id, {
 		password: hashedPassword,
 		updatedAt: getIsoString(),
 	});

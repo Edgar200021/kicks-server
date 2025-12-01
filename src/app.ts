@@ -20,7 +20,7 @@ import {
 } from "./common/clients/index.js";
 import type { ApplicationConfig, Config } from "./config/config.js";
 import { authRoutesV1 } from "./features/auth/routes/v1.js";
-import { usersRoutesV1 } from "./features/users/routes/v1.js";
+import { usersRoutesV1 } from "./features/user/routes/v1.js";
 
 const loggerOptions = (
 	config: ApplicationConfig,

@@ -17,10 +17,10 @@ export async function facebookSignIn(
 
 	const facebookUser = await this.oauth2Service.getFacebookUser(data.code);
 
-	const dbUser = await this.usersRepository.getByEmail(facebookUser.email);
+	const dbUser = await this.userRepository.getByEmail(facebookUser.email);
 
 	if (!dbUser) {
-		const user = await this.usersRepository.create({
+		const user = await this.userRepository.create({
 			facebookId: facebookUser.id,
 			email: facebookUser.email,
 			firstName: facebookUser.first_name,
@@ -33,7 +33,7 @@ export async function facebookSignIn(
 	}
 
 	if (!dbUser.facebookId) {
-		await this.usersRepository.updateById(dbUser.id, {
+		await this.userRepository.updateById(dbUser.id, {
 			facebookId: facebookUser.id,
 		});
 	}

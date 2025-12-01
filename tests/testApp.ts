@@ -278,6 +278,26 @@ const createTestApp = async () => {
 				headers: buildHeaders(options?.headers),
 			});
 		},
+
+		async removeUser(
+			userId: Selectable<Users>["id"],
+			options?: RequestOptions,
+		) {
+			return request(`${address}/api/v1/admin/user/${userId}`, {
+				...options,
+				method: "DELETE",
+				body: JSON.stringify({}),
+				headers: buildHeaders(options?.headers),
+			});
+		},
+
+		async getAllCategories(options?: RequestOptions) {
+			return request(`${address}/api/v1/admin/category`, {
+				...options,
+				method: "GET",
+				headers: buildHeaders(options?.headers),
+			});
+		},
 	};
 };
 

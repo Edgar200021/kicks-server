@@ -25,7 +25,7 @@ export async function authenticate(
 		throw httpErrors.unauthorized("Unauthorized");
 	}
 
-	const user = await this.usersRepository.getById(userId);
+	const user = await this.userRepository.getById(userId);
 	if (!user || !user.isVerified || user.isBanned) {
 		this.redis.del(userId);
 		throw httpErrors.unauthorized("Unauthorized");

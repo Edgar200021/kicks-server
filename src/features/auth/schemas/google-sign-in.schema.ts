@@ -1,5 +1,5 @@
 import z from "zod";
-import { UserSchema } from "@/features/users/schemas/user.schema.js";
+import { UserSchema } from "@/features/user/schemas/user.schema.js";
 
 export const GoogleSignInRequestQuerySchema = z.object({
 	code: z.string(),

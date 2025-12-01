@@ -17,7 +17,7 @@ import {
 	ResetPasswordRequestSchema,
 	ResetPasswordResponseSchema,
 } from "@/features/auth/schemas/reset-password.schema.js";
-import { UserSchema } from "@/features/users/schemas/user.schema.js";
+import { UserSchema } from "@/features/user/schemas/user.schema.js";
 import { GoogleSignInRequestQuerySchema } from "../schemas/google-sign-in.schema.js";
 import { OAuth2RedirectUrlRequestQuerySchema } from "../schemas/oauth2-redirect-url.js";
 import {

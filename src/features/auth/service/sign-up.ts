@@ -9,13 +9,13 @@ export async function signUp(
 	this: AuthService,
 	{ email, password, firstName, lastName, gender }: SignUpRequest,
 ): Promise<void> {
-	const user = await this.usersRepository.getByEmail(email);
+	const user = await this.userRepository.getByEmail(email);
 	if (user) {
 		throw httpErrors.badRequest(`User with email ${user.email} already exists`);
 	}
 
 	const hashedPassword = await scryptHash(password);
-	const { id } = await this.usersRepository.create({
+	const { id } = await this.userRepository.create({
 		email,
 		firstName,
 		lastName,

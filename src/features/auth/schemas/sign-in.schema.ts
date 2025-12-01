@@ -1,6 +1,6 @@
 import z from "zod";
 import { passwordSchema } from "@/features/auth/schemas/password.schema.js";
-import { UserSchema } from "@/features/users/schemas/user.schema.js";
+import { UserSchema } from "@/features/user/schemas/user.schema.js";
 
 export const SignInRequestSchema = z.object({
 	email: z.email(),

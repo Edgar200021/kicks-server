@@ -12,7 +12,7 @@ export async function verifyAccount(
 		throw httpErrors.badRequest("Account verification failed");
 	}
 
-	const user = await this.usersRepository.getById(userId);
+	const user = await this.userRepository.getById(userId);
 	if (!user || user.isVerified || user.isBanned) {
 		throw !user
 			? httpErrors.notFound("User not found")
@@ -21,7 +21,7 @@ export async function verifyAccount(
 				: httpErrors.badRequest(`User is already verified`);
 	}
 
-	await this.usersRepository.updateById(user.id, {
+	await this.userRepository.updateById(user.id, {
 		isVerified: true,
 	});
 }

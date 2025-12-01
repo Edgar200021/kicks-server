@@ -8,7 +8,7 @@ export async function forgotPassword(
 	this: AuthService,
 	data: ForgotPasswordRequest,
 ) {
-	const user = await this.usersRepository.getByEmail(data.email);
+	const user = await this.userRepository.getByEmail(data.email);
 	if (!user) {
 		throw httpErrors.notFound("User not found");
 	}

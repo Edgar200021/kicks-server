@@ -15,8 +15,8 @@ import { forgotPassword } from "@/features/auth/service/forgot-password.js";
 import { logout } from "@/features/auth/service/logout.js";
 import { facebookSignIn } from "@/features/auth/service/oauth2/facebook.js";
 import { resetPassword } from "@/features/auth/service/reset-password.js";
-import type { UsersRepository } from "@/features/users/repository/users.repository.js";
-import type { User } from "../../users/schemas/user.schema.js";
+import type { UserRepository } from "@/features/user/repository/user.repository.js";
+import type { User } from "../../user/schemas/user.schema.js";
 import type { OAuth2RedirectUrlRequestQuery } from "../schemas/oauth2-redirect-url.js";
 import type { Session } from "../types/index.js";
 import type { OAuth2Provider } from "../types/oauth2.js";
@@ -38,7 +38,7 @@ export class AuthService {
 	logout = logout;
 
 	constructor(
-		protected readonly usersRepository: UsersRepository,
+		protected readonly userRepository: UserRepository,
 		protected readonly emailService: EmailService,
 		protected readonly oauth2Service: OAuth2Service,
 		protected readonly redis: Redis,
@@ -51,7 +51,10 @@ export class AuthService {
 			this.genereateOauth2RedirectUrl.bind(this);
 	}
 
-	async generateSession(userId: Selectable<Users>["id"], type: Session) {
+	protected async generateSession(
+		userId: Selectable<Users>["id"],
+		type: Session,
+	) {
 		const id = randomUUID();
 		const ttl =
 			type === "regular"
@@ -87,7 +90,10 @@ export class AuthService {
 		};
 	}
 
-	verifyOAuthState(state: string, cookieState: string): Nullable<string> {
+	protected verifyOAuthState(
+		state: string,
+		cookieState: string,
+	): Nullable<string> {
 		const [uuidPart, redirectPath] = state.split(OAUTH_REDIRECT_PATH_SEPARATOR);
 		const decodedPath = redirectPath ? decodeURIComponent(redirectPath) : "";
 
@@ -98,7 +104,7 @@ export class AuthService {
 		return decodedPath || null;
 	}
 
-	async generateSessionAndReturnData(
+	protected async generateSessionAndReturnData(
 		this: AuthService,
 		user: Selectable<Users>,
 		redirectPath: Nullable<string>,

@@ -21,10 +21,10 @@ export async function googleSignIn(
 		throw httpErrors.badRequest("Email is not verified");
 	}
 
-	const dbUser = await this.usersRepository.getByEmail(googleUser.email);
+	const dbUser = await this.userRepository.getByEmail(googleUser.email);
 
 	if (!dbUser) {
-		const user = await this.usersRepository.create({
+		const user = await this.userRepository.create({
 			email: googleUser.email,
 			googleId: googleUser.sub,
 			firstName: googleUser.given_name,
@@ -36,7 +36,7 @@ export async function googleSignIn(
 	}
 
 	if (!dbUser.googleId) {
-		await this.usersRepository.updateById(dbUser.id, {
+		await this.userRepository.updateById(dbUser.id, {
 			googleId: googleUser.sub,
 		});
 	}

@@ -12,7 +12,7 @@ export async function signIn(
 	data: SignInRequest,
 	session?: string,
 ): Promise<{ sessionId: string; data: SignInResponse }> {
-	const user = await this.usersRepository.getByEmail(data.email);
+	const user = await this.userRepository.getByEmail(data.email);
 
 	if (!user || !user.password) {
 		throw httpErrors.badRequest(

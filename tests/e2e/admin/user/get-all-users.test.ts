@@ -2,7 +2,7 @@ import { faker } from "@faker-js/faker";
 import { Headers } from "undici";
 import { describe, expect, it } from "vitest";
 import { UserRole } from "../../../../src/common/types/db.js";
-import { GET_ALL_USERS_SEARCH_MAX_LENGTH } from "../../../../src/features/admin/users/const/zod";
+import { GET_ALL_USERS_SEARCH_MAX_LENGTH } from "../../../../src/features/admin/user/const/zod";
 import { generatePassword, withTestApp } from "../../../testApp.js";
 
 describe("Authentication", () => {
