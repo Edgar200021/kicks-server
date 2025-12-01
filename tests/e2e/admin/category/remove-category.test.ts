@@ -1,8 +1,9 @@
 import { faker } from "@faker-js/faker";
+import type { Selectable } from "kysely";
 import { Headers } from "undici";
 import { describe, expect, it } from "vitest";
-import { UserRole } from "../../../../src/common/types/db.js";
-import type { AdminUser } from "../../../../src/features/admin/user/schemas/user.schema.js";
+import { type Category, UserRole } from "../../../../src/common/types/db.js";
+
 import {
 	generatePassword,
 	type TestApp,
@@ -21,30 +22,30 @@ describe("Admin", () => {
 	const setup = async (app: TestApp) => {
 		const session = await app.createAdminUser(signUpData);
 
-		const res = await app.getAllUsers({
+		const getCategoriesRes = await app.getAllCategories({
 			headers: new Headers({
 				Cookie: session,
 			}),
+			query: {
+				limit: 1,
+			},
 		});
 
-		expect(res.statusCode).toBe(200);
-
-		const data = await res.body.json();
+		expect(getCategoriesRes.statusCode).toBe(200);
 
 		return {
 			session,
-			userId: (data.data.users as AdminUser[]).find(
-				(u) => u.role !== UserRole.Admin,
-			)!.id,
+			categories: (await getCategoriesRes.body.json())
+				.data as Selectable<Category>[],
 		};
 	};
 
-	describe("Block Toggle", () => {
+	describe("Remove category", () => {
 		it("Should return 200 status code when request is successful", async () => {
 			await withTestApp(async (app) => {
-				const { session, userId } = await setup(app);
+				const { session, categories } = await setup(app);
 
-				const res = await app.blockToggle(userId, {
+				const res = await app.removeCategory(categories[0].id, {
 					headers: new Headers({
 						Cookie: session,
 					}),
@@ -54,47 +55,28 @@ describe("Admin", () => {
 			});
 		});
 
-		it("Should save changes into database when request is successfull", async () => {
+		it("Should be deleted from database when request is successful", async () => {
 			await withTestApp(async (app) => {
-				const { session, userId } = await setup(app);
+				const { session, categories } = await setup(app);
 
-				const res = await app.blockToggle(userId, {
+				const res = await app.removeCategory(categories[0].id, {
 					headers: new Headers({
 						Cookie: session,
 					}),
 				});
-
 				expect(res.statusCode).toBe(200);
 
-				const dbUser = await app.db
-					.selectFrom("users")
-					.select("isBanned")
-					.where("id", "=", userId)
-					.executeTakeFirstOrThrow();
+				const dbCategory = await app.db
+					.selectFrom("category")
+					.select("name")
+					.where("id", "=", categories[0].id)
+					.executeTakeFirst();
 
-				expect(dbUser.isBanned).toBeTruthy();
-
-				const secondRes = await app.blockToggle(userId, {
-					headers: new Headers({
-						Cookie: session,
-					}),
-				});
-
-				expect(secondRes.statusCode).toBe(200);
-
-				expect(
-					(
-						await app.db
-							.selectFrom("users")
-							.select("isBanned")
-							.where("id", "=", userId)
-							.executeTakeFirstOrThrow()
-					).isBanned,
-				).toBeFalsy();
+				expect(dbCategory).toBeUndefined();
 			});
 		});
 
-		it("Should return 400 status code when userId is invalid", async () => {
+		it("Should return 400 status code when categoryId is invalid", async () => {
 			await withTestApp(async (app) => {
 				const session = await app.createAdminUser(signUpData);
 
@@ -111,7 +93,7 @@ describe("Admin", () => {
 
 				await Promise.all(
 					testCases.map(async ({ name, id }) => {
-						const res = await app.blockToggle(id as string, {
+						const res = await app.removeCategory(id as string, {
 							headers: new Headers({
 								Cookie: session,
 							}),
@@ -125,7 +107,7 @@ describe("Admin", () => {
 
 		it("Should return 401 status code user is not authenticated", async () => {
 			await withTestApp(async (app) => {
-				const res = await app.blockToggle(faker.string.uuid(), {});
+				const res = await app.updateCategory(faker.string.uuid(), {});
 
 				expect(res.statusCode).toEqual(401);
 			});
@@ -137,7 +119,7 @@ describe("Admin", () => {
 					body: JSON.stringify(signUpData),
 				});
 
-				const res = await app.blockToggle(faker.string.uuid(), {
+				const res = await app.updateCategory(faker.string.uuid(), {
 					headers: new Headers({
 						Cookie: session,
 					}),
@@ -147,11 +129,11 @@ describe("Admin", () => {
 			});
 		});
 
-		it("Should return 404 status code when user is not found", async () => {
+		it("Should return 404 status code when category doesn't exist", async () => {
 			await withTestApp(async (app) => {
 				const session = await app.createAdminUser(signUpData);
 
-				const res = await app.blockToggle(faker.string.uuid(), {
+				const res = await app.removeCategory(faker.string.uuid(), {
 					headers: new Headers({
 						Cookie: session,
 					}),

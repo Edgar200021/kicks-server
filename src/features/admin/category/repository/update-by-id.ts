@@ -6,13 +6,13 @@ export async function updateById(
 	this: AdminCategoryRepository,
 	id: Selectable<Category>["id"],
 	category: Updateable<Category>,
-): Promise<Selectable<Category>["id"]> {
-	const { id: categoryId } = await this.db
+): Promise<Selectable<Category>["id"] | undefined> {
+	const res = await this.db
 		.updateTable("category")
 		.set(category)
 		.where("id", "=", id)
 		.returning("id")
-		.executeTakeFirstOrThrow();
+		.executeTakeFirst();
 
-	return categoryId;
+	return res?.id;
 }

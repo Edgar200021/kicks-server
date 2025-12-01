@@ -10,7 +10,7 @@ import {
 	withTestApp,
 } from "../../../testApp.js";
 
-describe("Authentication", () => {
+describe("Admin", () => {
 	const signUpData = {
 		email: faker.internet.email(),
 		password: generatePassword(),
@@ -35,10 +35,6 @@ describe("Authentication", () => {
 
 		const data = await res.body.json();
 
-		expectTypeOf(data).toBeObject;
-		expectTypeOf(data.data).toHaveProperty("users");
-		expect(data.data.users).toBeInstanceOf(Array);
-
 		return {
 			session,
 			verifiedUserId: (data.data.users as AdminUser[]).filter(
@@ -50,7 +46,7 @@ describe("Authentication", () => {
 		};
 	};
 
-	describe("Reset Password", () => {
+	describe("Remove User", () => {
 		it("Should return 200 status code when request is successful", async () => {
 			await withTestApp(async (app) => {
 				const { notVerifiedUserId, session } = await setup(app);

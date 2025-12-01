@@ -10,7 +10,18 @@ export async function update(
 	data: UpdateCategoryRequest,
 	params: UpdateCategoryRequestParams,
 ) {
-	const categoryId = await this.categoryRepository.updateById(params.id, data);
+	const category = await this.categoryRepository.getByName(data.name);
+
+	if (category && category.id !== params.id) {
+		throw httpErrors.badRequest(
+			`Category with name ${data.name} already exists`,
+		);
+	}
+
+	const categoryId = await this.categoryRepository.updateById(params.id, {
+		...data,
+		updatedAt: new Date(),
+	});
 
 	if (!categoryId) {
 		throw httpErrors.notFound(`Category with id ${params.id} not found`);

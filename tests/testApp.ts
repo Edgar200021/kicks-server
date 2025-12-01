@@ -10,7 +10,7 @@ import {
 	SESSION_PREFIX,
 	VERIFICATION_PREFIX,
 } from "../src/common/const/index.js";
-import { UserRole, type Users } from "../src/common/types/db.js";
+import { type Category, UserRole, type Users } from "../src/common/types/db.js";
 import { deepFreeze } from "../src/common/utils/index.js";
 import { setupConfig } from "../src/config/config.js";
 import {
@@ -295,6 +295,37 @@ const createTestApp = async () => {
 			return request(`${address}/api/v1/admin/category`, {
 				...options,
 				method: "GET",
+				headers: buildHeaders(options?.headers),
+			});
+		},
+
+		async createCategory(options?: RequestOptions) {
+			return request(`${address}/api/v1/admin/category`, {
+				...options,
+				method: "POST",
+				headers: buildHeaders(options?.headers),
+			});
+		},
+
+		async updateCategory(
+			categoryId: Selectable<Category>["id"],
+			options?: RequestOptions,
+		) {
+			return request(`${address}/api/v1/admin/category/${categoryId}`, {
+				...options,
+				method: "PATCH",
+				headers: buildHeaders(options?.headers),
+			});
+		},
+
+		async removeCategory(
+			categoryId: Selectable<Category>["id"],
+			options?: RequestOptions,
+		) {
+			return request(`${address}/api/v1/admin/category/${categoryId}`, {
+				...options,
+				method: "DELETE",
+				body: JSON.stringify({}),
 				headers: buildHeaders(options?.headers),
 			});
 		},

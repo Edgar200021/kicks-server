@@ -5,7 +5,7 @@ import { UserRole } from "../../../../src/common/types/db.js";
 import { GET_ALL_USERS_SEARCH_MAX_LENGTH } from "../../../../src/features/admin/user/const/zod";
 import { generatePassword, withTestApp } from "../../../testApp.js";
 
-describe("Authentication", () => {
+describe("Admin", () => {
 	const signUpData = {
 		email: faker.internet.email(),
 		password: generatePassword(),
@@ -14,7 +14,7 @@ describe("Authentication", () => {
 		gender: faker.person.sexType(),
 	};
 
-	describe("Reset Password", () => {
+	describe("Get All Users", () => {
 		it("Should return 200 status code when request is successful", async () => {
 			await withTestApp(async (app) => {
 				const session = await app.createAdminUser(signUpData);

@@ -12,5 +12,5 @@ export async function remove(
 		.returning("id")
 		.executeTakeFirst();
 
-	return user?.id || undefined;
+	return user?.id;
 }

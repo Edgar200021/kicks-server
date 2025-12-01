@@ -1,4 +1,5 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
+import z from "zod";
 import { ErrorResponseSchema } from "@/common/schemas/error-response.schema.js";
 import { SuccessResponseSchema } from "@/common/schemas/success-response.schema.js";
 import { ValidationErrorResponseSchema } from "@/common/schemas/validation-error-response.schema.js";
@@ -53,7 +54,7 @@ export const adminCategoryRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 				body: CreateCategoryRequestSchema,
 				response: {
 					201: SuccessResponseSchema(CreateCategoryResponseSchema),
-					400: ValidationErrorResponseSchema,
+					400: z.union([ErrorResponseSchema, ValidationErrorResponseSchema]),
 					401: ErrorResponseSchema,
 					403: ErrorResponseSchema,
 				},
@@ -77,7 +78,7 @@ export const adminCategoryRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 				body: UpdateCategoryRequestSchema,
 				response: {
 					200: SuccessResponseSchema(UpdateCategoryResponseSchema),
-					400: ValidationErrorResponseSchema,
+					400: z.union([ErrorResponseSchema, ValidationErrorResponseSchema]),
 					401: ErrorResponseSchema,
 					403: ErrorResponseSchema,
 				},
