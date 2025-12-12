@@ -3,11 +3,12 @@ import {
 	CATEGORY_NAME_MAX_LENGTH,
 	CATEGORY_NAME_MIN_LENGTH,
 } from "@/features/admin/category/const/zod.js";
-import { CategorySchema } from "@/features/admin/category/schemas/category.schema.js";
+import {CategorySchema} from "@/features/admin/category/schemas/category.schema.js";
 
 export const CreateCategoryRequestSchema = z.object({
 	name: z
 		.string()
+		.trim()
 		.min(CATEGORY_NAME_MIN_LENGTH)
 		.max(CATEGORY_NAME_MAX_LENGTH)
 		.nonempty(),

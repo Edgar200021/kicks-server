@@ -1,13 +1,9 @@
-import { faker } from "@faker-js/faker";
-import { Headers } from "undici";
-import { describe, expect, it } from "vitest";
-import { UserRole } from "../../../../src/common/types/db.js";
-import type { AdminUser } from "../../../../src/features/admin/user/schemas/user.schema.js";
-import {
-	generatePassword,
-	type TestApp,
-	withTestApp,
-} from "../../../testApp.js";
+import {faker} from "@faker-js/faker";
+import {Headers} from "undici";
+import {describe, expect, it} from "vitest";
+import {UserGender, UserRole} from "../../../../src/common/types/db.js";
+import type {AdminUser} from "../../../../src/features/admin/user/schemas/user.schema.js";
+import {generatePassword, type TestApp, withTestApp,} from "../../../testApp.js";
 
 describe("Admin", () => {
 	const signUpData = {
@@ -15,7 +11,7 @@ describe("Admin", () => {
 		password: generatePassword(),
 		firstName: faker.person.firstName(),
 		lastName: faker.person.lastName(),
-		gender: faker.person.sexType(),
+		gender: faker.person.sexType() as UserGender,
 	};
 
 	const setup = async (app: TestApp) => {
@@ -42,7 +38,7 @@ describe("Admin", () => {
 	describe("Block Toggle", () => {
 		it("Should return 200 status code when request is successful", async () => {
 			await withTestApp(async (app) => {
-				const { session, userId } = await setup(app);
+				const {session, userId} = await setup(app);
 
 				const res = await app.blockToggle(userId, {
 					headers: new Headers({
@@ -54,9 +50,9 @@ describe("Admin", () => {
 			});
 		});
 
-		it("Should save changes into database when request is successfull", async () => {
+		it("Should save changes into database when request is successful", async () => {
 			await withTestApp(async (app) => {
-				const { session, userId } = await setup(app);
+				const {session, userId} = await setup(app);
 
 				const res = await app.blockToggle(userId, {
 					headers: new Headers({
@@ -110,7 +106,7 @@ describe("Admin", () => {
 				];
 
 				await Promise.all(
-					testCases.map(async ({ name, id }) => {
+					testCases.map(async ({name, id}) => {
 						const res = await app.blockToggle(id as string, {
 							headers: new Headers({
 								Cookie: session,

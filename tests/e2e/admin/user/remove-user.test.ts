@@ -1,14 +1,10 @@
-import { faker } from "@faker-js/faker";
-import { Headers } from "undici";
-import { describe, expect, expectTypeOf, it } from "vitest";
-import { UserRole } from "../../../../src/common/types/db.js";
-import { GET_ALL_USERS_MAX_LIMIT } from "../../../../src/features/admin/user/const/zod.js";
-import type { AdminUser } from "../../../../src/features/admin/user/schemas/user.schema";
-import {
-	generatePassword,
-	type TestApp,
-	withTestApp,
-} from "../../../testApp.js";
+import {faker} from "@faker-js/faker";
+import {Headers} from "undici";
+import {describe, expect, it} from "vitest";
+import {UserGender, UserRole} from "../../../../src/common/types/db.js";
+import {GET_ALL_USERS_MAX_LIMIT} from "../../../../src/features/admin/user/const/zod.js";
+import type {AdminUser} from "../../../../src/features/admin/user/schemas/user.schema.js";
+import {generatePassword, type TestApp, withTestApp,} from "../../../testApp.js";
 
 describe("Admin", () => {
 	const signUpData = {
@@ -16,7 +12,7 @@ describe("Admin", () => {
 		password: generatePassword(),
 		firstName: faker.person.firstName(),
 		lastName: faker.person.lastName(),
-		gender: faker.person.sexType(),
+		gender: faker.person.sexType() as UserGender,
 	};
 
 	const setup = async (app: TestApp) => {
@@ -49,7 +45,7 @@ describe("Admin", () => {
 	describe("Remove User", () => {
 		it("Should return 200 status code when request is successful", async () => {
 			await withTestApp(async (app) => {
-				const { notVerifiedUserId, session } = await setup(app);
+				const {notVerifiedUserId, session} = await setup(app);
 				await app.blockToggle(notVerifiedUserId, {
 					headers: new Headers({
 						Cookie: session,
@@ -66,9 +62,9 @@ describe("Admin", () => {
 			});
 		});
 
-		it("Should be removed from database when request is successfull", async () => {
+		it("Should be removed from database when request is successful", async () => {
 			await withTestApp(async (app) => {
-				const { session, notVerifiedUserId } = await setup(app);
+				const {session, notVerifiedUserId} = await setup(app);
 
 				await app.blockToggle(notVerifiedUserId, {
 					headers: new Headers({
@@ -110,7 +106,7 @@ describe("Admin", () => {
 				];
 
 				await Promise.all(
-					testCases.map(async ({ name, id }) => {
+					testCases.map(async ({name, id}) => {
 						const res = await app.removeUser(id as string, {
 							headers: new Headers({
 								Cookie: session,
@@ -125,7 +121,7 @@ describe("Admin", () => {
 
 		it("Should return 400 status code when user is not banned", async () => {
 			await withTestApp(async (app) => {
-				const { notVerifiedUserId, session } = await setup(app);
+				const {notVerifiedUserId, session} = await setup(app);
 
 				const res = await app.removeUser(notVerifiedUserId, {
 					headers: new Headers({
@@ -139,7 +135,7 @@ describe("Admin", () => {
 
 		it("Should return 400 when user account was created less than one day ago", async () => {
 			await withTestApp(async (app) => {
-				const { verifiedUserId, session } = await setup(app);
+				const {verifiedUserId, session} = await setup(app);
 
 				const res = await app.removeUser(verifiedUserId, {
 					headers: new Headers({

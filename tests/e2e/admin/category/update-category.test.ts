@@ -1,17 +1,13 @@
-import { faker } from "@faker-js/faker";
-import type { Selectable } from "kysely";
-import { Headers } from "undici";
-import { describe, expect, it } from "vitest";
-import { type Category, UserRole } from "../../../../src/common/types/db.js";
+import {faker} from "@faker-js/faker";
+import type {Selectable} from "kysely";
+import {Headers} from "undici";
+import {describe, expect, it} from "vitest";
+import {type Category, UserGender, UserRole} from "../../../../src/common/types/db.js";
 import {
 	CATEGORY_NAME_MAX_LENGTH,
 	CATEGORY_NAME_MIN_LENGTH,
-} from "../../../../src/features/admin/category/const/zod";
-import {
-	generatePassword,
-	type TestApp,
-	withTestApp,
-} from "../../../testApp.js";
+} from "../../../../src/features/admin/category/const/index.js";
+import {generatePassword, type TestApp, withTestApp,} from "../../../testApp.js";
 
 describe("Admin", () => {
 	const signUpData = {
@@ -19,7 +15,7 @@ describe("Admin", () => {
 		password: generatePassword(),
 		firstName: faker.person.firstName(),
 		lastName: faker.person.lastName(),
-		gender: faker.person.sexType(),
+		gender: faker.person.sexType() as UserGender,
 	};
 
 	const setup = async (app: TestApp) => {
@@ -46,7 +42,7 @@ describe("Admin", () => {
 	describe("Update category", () => {
 		it("Should return 200 status code when request is successful", async () => {
 			await withTestApp(async (app) => {
-				const { session, categories } = await setup(app);
+				const {session, categories} = await setup(app);
 
 				const newName = faker.string.alpha({
 					length: CATEGORY_NAME_MAX_LENGTH,
@@ -66,7 +62,7 @@ describe("Admin", () => {
 
 		it("Should save changes into database when request is successful", async () => {
 			await withTestApp(async (app) => {
-				const { session, categories } = await setup(app);
+				const {session, categories} = await setup(app);
 
 				const newName = faker.string.alpha({
 					length: CATEGORY_NAME_MAX_LENGTH,
@@ -121,7 +117,7 @@ describe("Admin", () => {
 				];
 
 				await Promise.all(
-					testCases.map(async ({ name, data }) => {
+					testCases.map(async ({name, data}) => {
 						const res = await app.updateCategory(faker.string.uuid(), {
 							headers: new Headers({
 								Cookie: session,
@@ -137,13 +133,13 @@ describe("Admin", () => {
 
 		it("Should return 400 status code when category already exists", async () => {
 			await withTestApp(async (app) => {
-				const { session, categories } = await setup(app);
+				const {session, categories} = await setup(app);
 
 				const res = await app.updateCategory(categories[0].id, {
 					headers: new Headers({
 						Cookie: session,
 					}),
-					body: JSON.stringify({ name: categories[1].name }),
+					body: JSON.stringify({name: categories[1].name}),
 				});
 
 				expect(res.statusCode).toBe(400);

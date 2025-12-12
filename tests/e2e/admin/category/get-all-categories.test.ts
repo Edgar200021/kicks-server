@@ -1,9 +1,9 @@
-import { faker } from "@faker-js/faker";
-import { Headers } from "undici";
-import { describe, expect, it } from "vitest";
-import { UserRole } from "../../../../src/common/types/db.js";
-import { GET_ALL_CATEGORIES_SEARCH_MAX_LENGTH } from "../../../../src/features/admin/category/const/zod";
-import { generatePassword, withTestApp } from "../../../testApp.js";
+import {faker} from "@faker-js/faker";
+import {Headers} from "undici";
+import {describe, expect, it} from "vitest";
+import {UserGender, UserRole} from "../../../../src/common/types/db.js";
+import {generatePassword, withTestApp} from "../../../testApp.js";
+import {GET_ALL_CATEGORIES_SEARCH_MAX_LENGTH} from "../../../../src/features/admin/category/const/index.js";
 
 describe("Admin", () => {
 	const signUpData = {
@@ -11,7 +11,7 @@ describe("Admin", () => {
 		password: generatePassword(),
 		firstName: faker.person.firstName(),
 		lastName: faker.person.lastName(),
-		gender: faker.person.sexType(),
+		gender: faker.person.sexType() as UserGender,
 	};
 
 	describe("Get All Categories", () => {
@@ -67,7 +67,7 @@ describe("Admin", () => {
 				];
 
 				await Promise.all(
-					testCases.map(async ({ name, data }) => {
+					testCases.map(async ({name, data}) => {
 						const res = await app.getAllCategories({
 							headers: new Headers({
 								Cookie: session,

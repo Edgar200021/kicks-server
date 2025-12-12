@@ -1,14 +1,11 @@
-import { httpErrors } from "@fastify/sensible";
-import type { FastifyRequest } from "fastify";
-import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
+import {httpErrors} from "@fastify/sensible";
+import type {FastifyRequest} from "fastify";
+import type {FastifyPluginAsyncZod} from "fastify-type-provider-zod";
 import z from "zod";
-import { OAUTH_COOKIE_SESSION_PREFIX } from "@/common/const/cookie.js";
-import { ErrorResponseSchema } from "@/common/schemas/error-response.schema.js";
-import {
-	SuccessResponseSchema,
-	ValidationErrorResponseSchema,
-} from "@/common/schemas/index.js";
-import { FacebookSignInRequestQuerySchema } from "@/features/auth/schemas/facebook-sign-in.schema.js";
+import {OAUTH_COOKIE_SESSION_PREFIX} from "@/common/const/cookie.js";
+import {ErrorResponseSchema} from "@/common/schemas/error-response.schema.js";
+import {SuccessResponseSchema, ValidationErrorResponseSchema,} from "@/common/schemas/index.js";
+import {FacebookSignInRequestQuerySchema} from "@/features/auth/schemas/facebook-sign-in.schema.js";
 import {
 	ForgotPasswordRequestSchema,
 	ForgotPasswordResponseSchema,
@@ -17,24 +14,18 @@ import {
 	ResetPasswordRequestSchema,
 	ResetPasswordResponseSchema,
 } from "@/features/auth/schemas/reset-password.schema.js";
-import { UserSchema } from "@/features/user/schemas/user.schema.js";
-import { GoogleSignInRequestQuerySchema } from "../schemas/google-sign-in.schema.js";
-import { OAuth2RedirectUrlRequestQuerySchema } from "../schemas/oauth2-redirect-url.js";
-import {
-	SignInRequestSchema,
-	SignInResponseSchema,
-} from "../schemas/sign-in.schema.js";
-import {
-	SignUpRequestSchema,
-	SignUpResponseSchema,
-} from "../schemas/sign-up.schema.js";
+import {UserSchema} from "@/features/user/schemas/user.schema.js";
+import {GoogleSignInRequestQuerySchema} from "../schemas/google-sign-in.schema.js";
+import {OAuth2RedirectUrlRequestQuerySchema} from "../schemas/oauth2-redirect-url.js";
+import {SignInRequestSchema, SignInResponseSchema,} from "../schemas/sign-in.schema.js";
+import {SignUpRequestSchema, SignUpResponseSchema,} from "../schemas/sign-up.schema.js";
 import {
 	VerifyAccountRequestSchema,
 	VerifyAccountResponseSchema,
 } from "../schemas/verify-account.schema.js";
 
 export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
-	const { config } = fastify;
+	const {config} = fastify;
 
 	const getOAuthState = (req: FastifyRequest) => {
 		const cookieState = req.cookies[config.application.oauthStateCookieName];
@@ -96,9 +87,9 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 			},
 		},
 		async (req, reply) => {
-			const { sessionValue } = req.getSession();
+			const {sessionValue} = req.getSession();
 
-			const { sessionId, data } = await fastify.services.authService.signIn(
+			const {sessionId, data} = await fastify.services.authService.signIn(
 				req.body,
 				sessionValue,
 			);
@@ -108,7 +99,7 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 				.cookie(config.application.sessionCookieName, sessionId, {
 					maxAge: config.application.sessionTTLMinutes * 60,
 				})
-				.send({ statusCode: 200, data });
+				.send({statusCode: 200, data});
 		},
 	);
 
@@ -132,7 +123,7 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 		},
 		async (req, reply) => {
 			await fastify.services.authService.verifyAccount(req.body);
-			return reply.status(200).send({ statusCode: 200, data: null });
+			return reply.status(200).send({statusCode: 200, data: null});
 		},
 	);
 
@@ -186,7 +177,7 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 			await fastify.services.authService.resetPassword(req.body);
 			return reply.status(200).send({
 				statusCode: 200,
-				data: "Password has been reset successfully.",
+				data: "Password has been reset successfuly.",
 			});
 		},
 	);
@@ -209,7 +200,7 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 			},
 		},
 		async (req, reply) => {
-			const { url, cookieState } =
+			const {url, cookieState} =
 				fastify.services.authService.genereateOauth2RedirectUrl(
 					req.query,
 					"google",
@@ -242,7 +233,7 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 		},
 		async (req, reply) => {
 			const cookieState = getOAuthState(req);
-			const { sessionId, redirectUrl } =
+			const {sessionId, redirectUrl} =
 				await fastify.services.authService.googleSignIn(req.query, cookieState);
 
 			return reply
@@ -275,7 +266,7 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 			},
 		},
 		async (req, reply) => {
-			const { url, cookieState } =
+			const {url, cookieState} =
 				fastify.services.authService.genereateOauth2RedirectUrl(
 					req.query,
 					"facebook",
@@ -308,7 +299,7 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 		},
 		async (req, reply) => {
 			const cookieState = getOAuthState(req);
-			const { sessionId, redirectUrl } =
+			const {sessionId, redirectUrl} =
 				await fastify.services.authService.facebookSignIn(
 					req.query,
 					cookieState,
@@ -373,7 +364,7 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 			},
 		},
 		async (req, reply) => {
-			const { sessionValue } = req.getSession();
+			const {sessionValue} = req.getSession();
 			if (!sessionValue) {
 				throw httpErrors.unauthorized("Unauthorized");
 			}

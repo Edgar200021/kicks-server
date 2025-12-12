@@ -1,12 +1,12 @@
-import { faker } from "@faker-js/faker";
-import { Headers } from "undici";
-import { describe, expect, it } from "vitest";
-import { UserRole } from "../../../../src/common/types/db.js";
+import {faker} from "@faker-js/faker";
+import {Headers} from "undici";
+import {describe, expect, it} from "vitest";
+import {UserGender, UserRole} from "../../../../src/common/types/db.js";
 import {
 	CATEGORY_NAME_MAX_LENGTH,
 	CATEGORY_NAME_MIN_LENGTH,
-} from "../../../../src/features/admin/category/const/zod";
-import { generatePassword, withTestApp } from "../../../testApp.js";
+} from "../../../../src/features/admin/category/const/index.js";
+import {generatePassword, withTestApp} from "../../../testApp.js";
 
 describe("Admin", () => {
 	const signUpData = {
@@ -14,7 +14,7 @@ describe("Admin", () => {
 		password: generatePassword(),
 		firstName: faker.person.firstName(),
 		lastName: faker.person.lastName(),
-		gender: faker.person.sexType(),
+		gender: faker.person.sexType() as UserGender,
 	};
 
 	describe("Create category", () => {
@@ -27,7 +27,7 @@ describe("Admin", () => {
 						Cookie: session,
 					}),
 					body: JSON.stringify({
-						name: faker.string.alpha({ length: CATEGORY_NAME_MAX_LENGTH }),
+						name: faker.string.alpha({length: CATEGORY_NAME_MAX_LENGTH}),
 					}),
 				});
 
@@ -70,7 +70,7 @@ describe("Admin", () => {
 				];
 
 				await Promise.all(
-					testCases.map(async ({ name, data }) => {
+					testCases.map(async ({name, data}) => {
 						const res = await app.createCategory({
 							headers: new Headers({
 								Cookie: session,
@@ -89,7 +89,7 @@ describe("Admin", () => {
 				const session = await app.createAdminUser(signUpData);
 
 				const body = JSON.stringify({
-					name: faker.string.alpha({ length: CATEGORY_NAME_MAX_LENGTH }),
+					name: faker.string.alpha({length: CATEGORY_NAME_MAX_LENGTH}),
 				});
 
 				const res = await app.createCategory({

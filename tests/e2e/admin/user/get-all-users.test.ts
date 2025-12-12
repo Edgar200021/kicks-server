@@ -1,9 +1,12 @@
-import { faker } from "@faker-js/faker";
-import { Headers } from "undici";
-import { describe, expect, it } from "vitest";
-import { UserRole } from "../../../../src/common/types/db.js";
-import { GET_ALL_USERS_SEARCH_MAX_LENGTH } from "../../../../src/features/admin/user/const/zod";
-import { generatePassword, withTestApp } from "../../../testApp.js";
+import {faker} from "@faker-js/faker";
+import {Headers} from "undici";
+import {describe, expect, it} from "vitest";
+import {UserGender, UserRole} from "../../../../src/common/types/db.js";
+import {
+	GET_ALL_USERS_MAX_LIMIT,
+	GET_ALL_USERS_SEARCH_MAX_LENGTH
+} from "../../../../src/features/admin/user/const/zod.js";
+import {generatePassword, withTestApp} from "../../../testApp.js";
 
 describe("Admin", () => {
 	const signUpData = {
@@ -11,7 +14,7 @@ describe("Admin", () => {
 		password: generatePassword(),
 		firstName: faker.person.firstName(),
 		lastName: faker.person.lastName(),
-		gender: faker.person.sexType(),
+		gender: faker.person.sexType() as UserGender,
 	};
 
 	describe("Get All Users", () => {
@@ -65,6 +68,12 @@ describe("Admin", () => {
 						},
 					},
 					{
+						name: "limit is too large",
+						data: {
+							limit: GET_ALL_USERS_MAX_LIMIT + 1
+						}
+					},
+					{
 						name: "isBanned is not boolean",
 						data: {
 							isBanned: "invalid value",
@@ -112,7 +121,7 @@ describe("Admin", () => {
 				];
 
 				await Promise.all(
-					testCases.map(async ({ name, data }) => {
+					testCases.map(async ({name, data}) => {
 						const res = await app.getAllUsers({
 							headers: new Headers({
 								Cookie: session,

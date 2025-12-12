@@ -1,7 +1,7 @@
-import { CamelCasePlugin, Kysely, PostgresDialect, sql } from "kysely";
-import { Pool } from "pg";
-import type { DB } from "@/common/types/db.js";
-import type { DatabaseConfig } from "@/config/database.config.js";
+import {CamelCasePlugin, Kysely, PostgresDialect, sql} from "kysely";
+import {Pool} from "pg";
+import type {DB} from "@/common/types/db.js";
+import type {DatabaseConfig} from "@/config/database.config.js";
 
 export const setupDatabaseClient = async (
 	config: DatabaseConfig,

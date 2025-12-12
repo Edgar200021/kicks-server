@@ -1,5 +1,5 @@
 import z from "zod";
-import { IdParamsSchema } from "@/common/schemas/id-param.schema.js";
+import {IdParamsSchema} from "@/common/schemas/id-param.schema.js";
 import {
 	CATEGORY_NAME_MAX_LENGTH,
 	CATEGORY_NAME_MIN_LENGTH,
@@ -10,6 +10,7 @@ export const UpdateCategoryRequestParamsSchema = IdParamsSchema;
 export const UpdateCategoryRequestSchema = z.object({
 	name: z
 		.string()
+		.trim()
 		.min(CATEGORY_NAME_MIN_LENGTH)
 		.max(CATEGORY_NAME_MAX_LENGTH)
 		.nonempty(),

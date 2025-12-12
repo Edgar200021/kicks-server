@@ -1,29 +1,41 @@
-import { httpErrors } from "@fastify/sensible";
+import {httpErrors} from "@fastify/sensible";
 import type {
 	UpdateCategoryRequest,
 	UpdateCategoryRequestParams,
 } from "@/features/admin/category/schemas/update-category.schema.js";
-import type { AdminCategoryService } from "@/features/admin/category/service/admin-category.service.js";
+import type {
+	AdminCategoryService
+} from "@/features/admin/category/service/admin-category.service.js";
+import {isDatabaseError} from "@/common/types/database.js";
+import {DUPLICATE_CODE} from "@/common/const/database.js";
 
 export async function update(
 	this: AdminCategoryService,
 	data: UpdateCategoryRequest,
 	params: UpdateCategoryRequestParams,
 ) {
-	const category = await this.categoryRepository.getByName(data.name);
+	// const category = await this.categoryRepository.getByName(data.name);
+	//
+	// if (category && category.id !== params.id) {
+	// 	throw httpErrors.badRequest(
+	// 		`Category with name ${data.name} already exists`,
+	// 	);
+	// }
+	try {
+		const categoryId = await this.categoryRepository.updateById(params.id, {
+			...data,
+			updatedAt: new Date(),
+		});
 
-	if (category && category.id !== params.id) {
-		throw httpErrors.badRequest(
-			`Category with name ${data.name} already exists`,
-		);
-	}
-
-	const categoryId = await this.categoryRepository.updateById(params.id, {
-		...data,
-		updatedAt: new Date(),
-	});
-
-	if (!categoryId) {
-		throw httpErrors.notFound(`Category with id ${params.id} not found`);
+		if (!categoryId) {
+			throw httpErrors.notFound(`Category with id ${params.id} not found`);
+		}
+	} catch (err) {
+		if (isDatabaseError(err) && err.code === DUPLICATE_CODE) {
+			throw httpErrors.badRequest(
+				`Category with name ${data.name} already exists`,
+			);
+		}
+		throw err
 	}
 }

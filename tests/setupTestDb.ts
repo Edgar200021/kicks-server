@@ -1,18 +1,12 @@
-import { exec } from "node:child_process";
-import { promises as fs } from "node:fs";
+import {exec} from "node:child_process";
+import {promises as fs} from "node:fs";
 import path from "node:path";
-import { promisify } from "node:util";
-import {
-	CamelCasePlugin,
-	Kysely,
-	type Migration,
-	Migrator,
-	PostgresDialect,
-} from "kysely";
+import {promisify} from "node:util";
+import {CamelCasePlugin, Kysely, type Migration, Migrator, PostgresDialect,} from "kysely";
 import pg from "pg";
 import ts from "ts-node";
-import type { DB } from "../src/common/types/db";
-import type { DatabaseConfig } from "../src/config/database.config";
+import type {DB} from "../src/common/types/db";
+import type {DatabaseConfig} from "../src/config/database.config";
 
 const execAsync = promisify(exec);
 
@@ -21,7 +15,7 @@ ts.register({
 });
 
 const runSeed = async (databaseUrl?: string) => {
-	const { stderr } = await execAsync("npm run seed:run", {
+	const {stderr} = await execAsync("npm run seed:run", {
 		env: {
 			...process.env,
 			DATABASE_URL: databaseUrl || process.env.DATABASE_URL,
@@ -49,7 +43,7 @@ export const setupTestDb = async (config: DatabaseConfig) => {
 			adminClient.release();
 			await adminPool.end();
 
-			console.log(`🗑 Database "${config.name}" removed successfully.`);
+			console.log(`🗑 Database "${config.name}" removed successfuly.`);
 		} catch (err) {
 			console.error(`Failed to remove database "${config.name}"`, err);
 		}
@@ -109,13 +103,13 @@ export const setupTestDb = async (config: DatabaseConfig) => {
 						const importPath = path
 							.join(absolutePath, fileName)
 							.replaceAll("\\", "/");
-						const { up, down } = await import(importPath);
+						const {up, down} = await import(importPath);
 						const migrationKey = fileName.substring(
 							0,
 							fileName.lastIndexOf("."),
 						);
 
-						migrations[migrationKey] = { up, down };
+						migrations[migrationKey] = {up, down};
 					}
 
 					return migrations;
@@ -123,7 +117,7 @@ export const setupTestDb = async (config: DatabaseConfig) => {
 			},
 		});
 
-		const { error } = await migrator.migrateToLatest();
+		const {error} = await migrator.migrateToLatest();
 
 		if (error) {
 			console.error("Failed to run migrations", error);
@@ -134,7 +128,7 @@ export const setupTestDb = async (config: DatabaseConfig) => {
 			`postgres://${config.user}:${config.password}@${config.host}:${config.port}/${config.name}`,
 		);
 
-		console.log("🎉 All migrations applied successfully.");
+		console.log("🎉 All migrations applied successfuly.");
 
 		return {
 			db,

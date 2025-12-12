@@ -107,7 +107,7 @@ export const buildApp = async (config: Config) => {
 
 	app.decorate<typeof services>("services", services);
 
-	await app.register(autoload, {
+	app.register(autoload, {
 		dir: path.join(import.meta.dirname, "plugins/internal"),
 		options: { ...app.options },
 		encapsulate: false,

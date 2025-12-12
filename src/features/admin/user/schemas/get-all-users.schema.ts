@@ -1,13 +1,13 @@
 import z from "zod";
-import { PaginationSchema } from "@/common/schemas/pagination.schema.js";
-import { PageCountSchema } from "@/common/schemas/with-page-count.schema.js";
-import { UserGender } from "@/common/types/db.js";
+import {PaginationSchema} from "@/common/schemas/pagination.schema.js";
+import {PageCountSchema} from "@/common/schemas/with-page-count.schema.js";
+import {UserGender} from "@/common/types/db.js";
 import {
 	GET_ALL_USERS_DEFAULT_LIMIT,
 	GET_ALL_USERS_MAX_LIMIT,
 	GET_ALL_USERS_SEARCH_MAX_LENGTH,
 } from "@/features/admin/user/const/index.js";
-import { AdminUserSchema } from "@/features/admin/user/schemas/user.schema.js";
+import {AdminUserSchema} from "@/features/admin/user/schemas/user.schema.js";
 
 export const GetAllUsersRequestQuerySchema = z
 	.object({
@@ -31,9 +31,11 @@ export const GetAllUsersRequestQuerySchema = z
 		}),
 	)
 	.refine((obj) =>
-		!obj.startDate || !obj.endDate
-			? true
-			: obj.endDate.getTime() > obj.startDate.getTime(),
+			!obj.startDate || !obj.endDate
+				? true
+				: obj.endDate.getTime() > obj.startDate.getTime(), {
+			path: ["startDate"]
+		}
 	);
 
 export const GetAllUsersResponseSchema = z

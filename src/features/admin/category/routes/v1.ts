@@ -1,15 +1,15 @@
-import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
+import type {FastifyPluginAsyncZod} from "fastify-type-provider-zod";
 import z from "zod";
-import { ErrorResponseSchema } from "@/common/schemas/error-response.schema.js";
-import { SuccessResponseSchema } from "@/common/schemas/success-response.schema.js";
-import { ValidationErrorResponseSchema } from "@/common/schemas/validation-error-response.schema.js";
+import {ErrorResponseSchema} from "@/common/schemas/error-response.schema.js";
+import {SuccessResponseSchema} from "@/common/schemas/success-response.schema.js";
+import {ValidationErrorResponseSchema} from "@/common/schemas/validation-error-response.schema.js";
 import {
 	CreateCategoryRequestSchema,
 	CreateCategoryResponseSchema,
 } from "@/features/admin/category/schemas/create-category.schema.js";
 import {
 	GetAllCategoriesResponseSchema,
-	GetAllCatgoriesRequestQuerySchema,
+	GetAllCategoriesRequestQuerySchema,
 } from "@/features/admin/category/schemas/get-all-categories.schema.js";
 import {
 	RemoveCategoryRequestParamsSchema,
@@ -22,13 +22,13 @@ import {
 } from "@/features/admin/category/schemas/update-category.schema.js";
 
 export const adminCategoryRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
-	const { adminCategoryService } = fastify.services;
+	const {adminCategoryService} = fastify.services;
 
 	fastify.get(
 		"/",
 		{
 			schema: {
-				querystring: GetAllCatgoriesRequestQuerySchema,
+				querystring: GetAllCategoriesRequestQuerySchema,
 				response: {
 					200: SuccessResponseSchema(GetAllCategoriesResponseSchema),
 					400: ValidationErrorResponseSchema,

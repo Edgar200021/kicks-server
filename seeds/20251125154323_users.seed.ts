@@ -1,6 +1,6 @@
-import { faker } from "@faker-js/faker";
-import type { Kysely } from "kysely";
-import type { DB, UserGender } from "@/common/types/db.js";
+import {faker} from "@faker-js/faker";
+import type {Kysely} from "kysely";
+import type {DB, UserGender} from "../src/common/types/db.js";
 
 export async function seed(db: Kysely<DB>): Promise<void> {
 	const emails = faker.helpers.uniqueArray(faker.internet.email, 500);
@@ -8,7 +8,7 @@ export async function seed(db: Kysely<DB>): Promise<void> {
 	await db
 		.insertInto("users")
 		.values(
-			Array.from({ length: emails.length }).map((_, i) => ({
+			Array.from({length: emails.length}).map((_, i) => ({
 				email: emails[i],
 				password: faker.internet.password(),
 				firstName: faker.person.firstName(),
@@ -17,5 +17,6 @@ export async function seed(db: Kysely<DB>): Promise<void> {
 				isVerified: i % 2 === 0,
 			})),
 		)
+		.onConflict((oc) => oc.column("email").doNothing())
 		.execute();
 }
