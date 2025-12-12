@@ -1,8 +1,11 @@
 import { faker } from "@faker-js/faker";
 import { Headers } from "undici";
 import { describe, expect, it } from "vitest";
-import { UserRole } from "../../../../src/common/types/db.js";
-import { GET_ALL_USERS_SEARCH_MAX_LENGTH } from "../../../../src/features/admin/user/const/zod";
+import { type UserGender, UserRole } from "../../../../src/common/types/db.js";
+import {
+	GET_ALL_USERS_MAX_LIMIT,
+	GET_ALL_USERS_SEARCH_MAX_LENGTH,
+} from "../../../../src/features/admin/user/const/zod.js";
 import { generatePassword, withTestApp } from "../../../testApp.js";
 
 describe("Admin", () => {
@@ -11,7 +14,7 @@ describe("Admin", () => {
 		password: generatePassword(),
 		firstName: faker.person.firstName(),
 		lastName: faker.person.lastName(),
-		gender: faker.person.sexType(),
+		gender: faker.person.sexType() as UserGender,
 	};
 
 	describe("Get All Users", () => {
@@ -62,6 +65,12 @@ describe("Admin", () => {
 						name: "limit is zero",
 						data: {
 							limit: 0,
+						},
+					},
+					{
+						name: "limit is too large",
+						data: {
+							limit: GET_ALL_USERS_MAX_LIMIT + 1,
 						},
 					},
 					{

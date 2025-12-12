@@ -186,7 +186,7 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 			await fastify.services.authService.resetPassword(req.body);
 			return reply.status(200).send({
 				statusCode: 200,
-				data: "Password has been reset successfully.",
+				data: "Password has been reset successfuly.",
 			});
 		},
 	);

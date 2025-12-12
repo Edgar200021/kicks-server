@@ -2,7 +2,11 @@ import { faker } from "@faker-js/faker";
 import type { Selectable } from "kysely";
 import { Headers } from "undici";
 import { describe, expect, it } from "vitest";
-import { type Category, UserRole } from "../../../../src/common/types/db.js";
+import {
+	type Category,
+	type UserGender,
+	UserRole,
+} from "../../../../src/common/types/db.js";
 
 import {
 	generatePassword,
@@ -16,7 +20,7 @@ describe("Admin", () => {
 		password: generatePassword(),
 		firstName: faker.person.firstName(),
 		lastName: faker.person.lastName(),
-		gender: faker.person.sexType(),
+		gender: faker.person.sexType() as UserGender,
 	};
 
 	const setup = async (app: TestApp) => {

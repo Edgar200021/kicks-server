@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import type { Kysely } from "kysely";
-import type { DB } from "@/common/types/db.js";
+import type { DB } from "../src/common/types/db.js";
 
 export async function seed(db: Kysely<DB>): Promise<void> {
 	const categories = faker.helpers.uniqueArray(faker.commerce.department, 100);
@@ -12,5 +12,6 @@ export async function seed(db: Kysely<DB>): Promise<void> {
 				name: categories[i],
 			})),
 		)
+		.onConflict((oc) => oc.column("name").doNothing())
 		.execute();
 }

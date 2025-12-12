@@ -6,98 +6,98 @@
 import type { ColumnType } from "kysely";
 
 export enum ProductGender {
-  Men = "men",
-  Unisex = "unisex",
-  Women = "women",
+	Men = "men",
+	Unisex = "unisex",
+	Women = "women",
 }
 
 export enum UserGender {
-  Female = "female",
-  Male = "male",
-  Other = "other",
+	Female = "female",
+	Male = "male",
+	Other = "other",
 }
 
 export enum UserRole {
-  Admin = "admin",
-  Regular = "regular",
+	Admin = "admin",
+	Regular = "regular",
 }
 
 export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
-  ? ColumnType<S, I | undefined, U>
-  : ColumnType<T, T | undefined, T>;
+	? ColumnType<S, I | undefined, U>
+	: ColumnType<T, T | undefined, T>;
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export interface Brand {
-  createdAt: Generated<Timestamp>;
-  id: Generated<string>;
-  name: string;
-  updatedAt: Generated<Timestamp>;
+	createdAt: Generated<Timestamp>;
+	id: Generated<string>;
+	name: string;
+	updatedAt: Generated<Timestamp>;
 }
 
 export interface Category {
-  createdAt: Generated<Timestamp>;
-  id: Generated<string>;
-  name: string;
-  updatedAt: Generated<Timestamp>;
+	createdAt: Generated<Timestamp>;
+	id: Generated<string>;
+	name: string;
+	updatedAt: Generated<Timestamp>;
 }
 
 export interface Product {
-  brandId: string | null;
-  categoryId: string | null;
-  createdAt: Generated<Timestamp>;
-  description: string;
-  gender: ProductGender;
-  id: Generated<string>;
-  isDeleted: Generated<boolean>;
-  tags: Generated<string[]>;
-  title: string;
-  updatedAt: Generated<Timestamp>;
+	brandId: string | null;
+	categoryId: string | null;
+	createdAt: Generated<Timestamp>;
+	description: string;
+	gender: ProductGender;
+	id: Generated<string>;
+	isDeleted: Generated<boolean>;
+	tags: Generated<string[]>;
+	title: string;
+	updatedAt: Generated<Timestamp>;
 }
 
 export interface ProductSku {
-  color: string;
-  createdAt: Generated<Timestamp>;
-  id: Generated<string>;
-  price: number;
-  productId: string | null;
-  quantity: number;
-  salePrice: number | null;
-  size: string;
-  sku: string;
-  updatedAt: Generated<Timestamp>;
+	color: string;
+	createdAt: Generated<Timestamp>;
+	id: Generated<string>;
+	price: number;
+	productId: string | null;
+	quantity: number;
+	salePrice: number | null;
+	size: string;
+	sku: string;
+	updatedAt: Generated<Timestamp>;
 }
 
 export interface ProductSkuImage {
-  createdAt: Generated<Timestamp>;
-  id: Generated<string>;
-  imageId: string;
-  imageUrl: string;
-  productSkuId: string | null;
-  updatedAt: Generated<Timestamp>;
+	createdAt: Generated<Timestamp>;
+	id: Generated<string>;
+	imageId: string;
+	imageUrl: string;
+	productSkuId: string | null;
+	updatedAt: Generated<Timestamp>;
 }
 
 export interface Users {
-  createdAt: Generated<Timestamp>;
-  email: string;
-  facebookId: string | null;
-  firstName: string | null;
-  gender: UserGender | null;
-  googleId: string | null;
-  id: Generated<string>;
-  isBanned: Generated<boolean>;
-  isVerified: Generated<boolean>;
-  lastName: string | null;
-  password: string | null;
-  role: Generated<UserRole>;
-  updatedAt: Generated<Timestamp>;
+	createdAt: Generated<Timestamp>;
+	email: string;
+	facebookId: string | null;
+	firstName: string | null;
+	gender: UserGender | null;
+	googleId: string | null;
+	id: Generated<string>;
+	isBanned: Generated<boolean>;
+	isVerified: Generated<boolean>;
+	lastName: string | null;
+	password: string | null;
+	role: Generated<UserRole>;
+	updatedAt: Generated<Timestamp>;
 }
 
 export interface DB {
-  brand: Brand;
-  category: Category;
-  product: Product;
-  productSku: ProductSku;
-  productSkuImage: ProductSkuImage;
-  users: Users;
+	brand: Brand;
+	category: Category;
+	product: Product;
+	productSku: ProductSku;
+	productSkuImage: ProductSkuImage;
+	users: Users;
 }

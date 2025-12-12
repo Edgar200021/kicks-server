@@ -30,6 +30,7 @@ export const adminUsersRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 					401: ErrorResponseSchema,
 					403: ErrorResponseSchema,
 				},
+				tags: ["Admin/User"],
 			},
 		},
 		async (req, reply) => {
@@ -54,6 +55,7 @@ export const adminUsersRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 					403: ErrorResponseSchema,
 					404: ErrorResponseSchema,
 				},
+				tags: ["Admin/User"],
 			},
 		},
 		async (req, reply) => {
@@ -78,6 +80,7 @@ export const adminUsersRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 					403: ErrorResponseSchema,
 					404: ErrorResponseSchema,
 				},
+				tags: ["Admin/User"],
 			},
 		},
 		async (req, reply) => {

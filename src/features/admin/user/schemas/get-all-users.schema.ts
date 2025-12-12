@@ -30,10 +30,14 @@ export const GetAllUsersRequestQuerySchema = z
 			defaultLimit: GET_ALL_USERS_DEFAULT_LIMIT,
 		}),
 	)
-	.refine((obj) =>
-		!obj.startDate || !obj.endDate
-			? true
-			: obj.endDate.getTime() > obj.startDate.getTime(),
+	.refine(
+		(obj) =>
+			!obj.startDate || !obj.endDate
+				? true
+				: obj.endDate.getTime() > obj.startDate.getTime(),
+		{
+			path: ["startDate"],
+		},
 	);
 
 export const GetAllUsersResponseSchema = z

@@ -8,6 +8,7 @@ import { CategorySchema } from "@/features/admin/category/schemas/category.schem
 export const CreateCategoryRequestSchema = z.object({
 	name: z
 		.string()
+		.trim()
 		.min(CATEGORY_NAME_MIN_LENGTH)
 		.max(CATEGORY_NAME_MAX_LENGTH)
 		.nonempty(),

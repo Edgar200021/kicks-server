@@ -11,8 +11,8 @@ import {
 } from "kysely";
 import pg from "pg";
 import ts from "ts-node";
-import type { DB } from "../src/common/types/db";
-import type { DatabaseConfig } from "../src/config/database.config";
+import type { DB } from "../src/common/types/db.js";
+import type { DatabaseConfig } from "../src/config/database.config.js";
 
 const execAsync = promisify(exec);
 
@@ -67,8 +67,8 @@ export const setupTestDb = async (config: DatabaseConfig) => {
 		const adminClient = await adminPool.connect();
 		const res = await adminClient.query(
 			`SELECT 1
-                                         FROM pg_database
-                                         WHERE datname = $1`,
+       FROM pg_database
+       WHERE datname = $1`,
 			[config.name],
 		);
 		if (res.rowCount === 0) {

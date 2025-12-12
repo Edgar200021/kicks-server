@@ -10,6 +10,7 @@ export const UpdateCategoryRequestParamsSchema = IdParamsSchema;
 export const UpdateCategoryRequestSchema = z.object({
 	name: z
 		.string()
+		.trim()
 		.min(CATEGORY_NAME_MIN_LENGTH)
 		.max(CATEGORY_NAME_MAX_LENGTH)
 		.nonempty(),

@@ -1,9 +1,9 @@
 import { faker } from "@faker-js/faker";
 import { Headers } from "undici";
-import { describe, expect, expectTypeOf, it } from "vitest";
-import { UserRole } from "../../../../src/common/types/db.js";
+import { describe, expect, it } from "vitest";
+import { type UserGender, UserRole } from "../../../../src/common/types/db.js";
 import { GET_ALL_USERS_MAX_LIMIT } from "../../../../src/features/admin/user/const/zod.js";
-import type { AdminUser } from "../../../../src/features/admin/user/schemas/user.schema";
+import type { AdminUser } from "../../../../src/features/admin/user/schemas/user.schema.js";
 import {
 	generatePassword,
 	type TestApp,
@@ -16,7 +16,7 @@ describe("Admin", () => {
 		password: generatePassword(),
 		firstName: faker.person.firstName(),
 		lastName: faker.person.lastName(),
-		gender: faker.person.sexType(),
+		gender: faker.person.sexType() as UserGender,
 	};
 
 	const setup = async (app: TestApp) => {
@@ -66,7 +66,7 @@ describe("Admin", () => {
 			});
 		});
 
-		it("Should be removed from database when request is successfull", async () => {
+		it("Should be removed from database when request is successful", async () => {
 			await withTestApp(async (app) => {
 				const { session, notVerifiedUserId } = await setup(app);
 

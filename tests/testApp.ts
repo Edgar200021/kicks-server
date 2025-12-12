@@ -1,24 +1,21 @@
-import { randomUUID } from "node:crypto";
-import { RedisContainer } from "@testcontainers/redis";
-import Redis from "ioredis";
-import type { Selectable } from "kysely";
-import { type Dispatcher, Headers, request } from "undici";
-import type { UndiciHeaders } from "undici/types/dispatcher.js";
-import { buildApp } from "../src/app.js";
+import {randomUUID} from "node:crypto";
+import {RedisContainer} from "@testcontainers/redis";
+import {Redis} from "ioredis";
+import type {Selectable} from "kysely";
+import {type Dispatcher, Headers, request} from "undici";
+import type {UndiciHeaders} from "undici/types/dispatcher.js";
+import {buildApp} from "../src/app.js";
 import {
 	RESET_PASSWORD_PREFIX,
 	SESSION_PREFIX,
 	VERIFICATION_PREFIX,
 } from "../src/common/const/index.js";
-import { type Category, UserRole, type Users } from "../src/common/types/db.js";
-import { deepFreeze } from "../src/common/utils/index.js";
-import { setupConfig } from "../src/config/config.js";
-import {
-	PASSWORD_MAX_LENGTH,
-	PASSWORD_MIN_LENGTH,
-} from "../src/features/auth/const/zod.js";
-import type { SignUpRequest } from "../src/features/auth/schemas/sign-up.schema.js";
-import { setupTestDb } from "./setupTestDb.js";
+import {type Brand, type Category, UserRole, type Users,} from "../src/common/types/db.js";
+import {deepFreeze} from "../src/common/utils/index.js";
+import {setupConfig} from "../src/config/config.js";
+import {PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH,} from "../src/features/auth/const/zod.js";
+import type {SignUpRequest} from "../src/features/auth/schemas/sign-up.schema.js";
+import {setupTestDb} from "./setupTestDb.js";
 
 const UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const LOWERCASE = "abcdefghijklmnopqrstuvwxyz";
@@ -74,7 +71,7 @@ const buildHeaders = (headers?: UndiciHeaders) => {
 			}
 			return result;
 		},
-		new Headers({ "Content-Type": "application/json" }),
+		new Headers({"Content-Type": "application/json"}),
 	);
 };
 
@@ -113,7 +110,7 @@ const createTestApp = async () => {
 
 	deepFreeze(config);
 
-	const { removeDb, db } = await setupTestDb(config.database);
+	const {removeDb, db} = await setupTestDb(config.database);
 	const redis = new Redis({
 		host: config.redis.host,
 		port: config.redis.port,
@@ -121,14 +118,14 @@ const createTestApp = async () => {
 	});
 	const app = await buildApp(config);
 
-	const address = await app.listen({ port: 0, host: "127.0.0.1" });
+	const address = await app.listen({port: 0, host: "127.0.0.1"});
 
 	return {
 		async close() {
 			await app.close();
 			await Promise.all([db.destroy(), redis.quit()]);
 			await Promise.all([
-				redisContainer.stop({ remove: true, removeVolumes: true }),
+				redisContainer.stop({remove: true, removeVolumes: true}),
 				removeDb(),
 			]);
 		},
@@ -198,7 +195,7 @@ const createTestApp = async () => {
 			}
 
 			const token = await this.getRedisToken("verification");
-			return this.verifyAccount({ body: JSON.stringify({ token }) });
+			return this.verifyAccount({body: JSON.stringify({token})});
 		},
 
 		async createAndSignIn(options?: RequestOptions): Promise<string> {
@@ -234,7 +231,7 @@ const createTestApp = async () => {
 			});
 			await db
 				.updateTable("users")
-				.set({ role: UserRole.Admin })
+				.set({role: UserRole.Admin})
 				.where("email", "=", body.email)
 				.executeTakeFirstOrThrow();
 
@@ -326,6 +323,69 @@ const createTestApp = async () => {
 				...options,
 				method: "DELETE",
 				body: JSON.stringify({}),
+				headers: buildHeaders(options?.headers),
+			});
+		},
+
+		async getAllBrands(options?: RequestOptions) {
+			return request(`${address}/api/v1/admin/brand`, {
+				...options,
+				method: "GET",
+				headers: buildHeaders(options?.headers),
+			});
+		},
+
+		async createBrand(options?: RequestOptions) {
+			return request(`${address}/api/v1/admin/brand`, {
+				...options,
+				method: "POST",
+				headers: buildHeaders(options?.headers),
+			});
+		},
+
+		async updateBrand(
+			brandId: Selectable<Brand>["id"],
+			options?: RequestOptions,
+		) {
+			return request(`${address}/api/v1/admin/brand/${brandId}`, {
+				...options,
+				method: "PATCH",
+				headers: buildHeaders(options?.headers),
+			});
+		},
+
+		async removeBrand(
+			brandId: Selectable<Brand>["id"],
+			options?: RequestOptions,
+		) {
+			return request(`${address}/api/v1/admin/brand/${brandId}`, {
+				...options,
+				method: "DELETE",
+				body: JSON.stringify({}),
+				headers: buildHeaders(options?.headers),
+			});
+		},
+
+		async getAllAdminProducts(options?: RequestOptions) {
+			return request(`${address}/api/v1/admin/product`, {
+				...options,
+				method: "GET",
+				headers: buildHeaders(options?.headers),
+			});
+		},
+
+		async getProductFilters(options?: RequestOptions) {
+			return request(`${address}/api/v1/admin/product/filters`, {
+				...options,
+				method: "GET",
+				headers: buildHeaders(options?.headers),
+			});
+		},
+
+		async createProduct(options?: RequestOptions) {
+			return request(`${address}/api/v1/admin/product`, {
+				...options,
+				method: "POST",
 				headers: buildHeaders(options?.headers),
 			});
 		},

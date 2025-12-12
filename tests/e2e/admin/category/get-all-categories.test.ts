@@ -1,8 +1,8 @@
 import { faker } from "@faker-js/faker";
 import { Headers } from "undici";
 import { describe, expect, it } from "vitest";
-import { UserRole } from "../../../../src/common/types/db.js";
-import { GET_ALL_CATEGORIES_SEARCH_MAX_LENGTH } from "../../../../src/features/admin/category/const/zod";
+import { type UserGender, UserRole } from "../../../../src/common/types/db.js";
+import { GET_ALL_CATEGORIES_SEARCH_MAX_LENGTH } from "../../../../src/features/admin/category/const/index.js";
 import { generatePassword, withTestApp } from "../../../testApp.js";
 
 describe("Admin", () => {
@@ -11,7 +11,7 @@ describe("Admin", () => {
 		password: generatePassword(),
 		firstName: faker.person.firstName(),
 		lastName: faker.person.lastName(),
-		gender: faker.person.sexType(),
+		gender: faker.person.sexType() as UserGender,
 	};
 
 	describe("Get All Categories", () => {

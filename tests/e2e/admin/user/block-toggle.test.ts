@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { Headers } from "undici";
 import { describe, expect, it } from "vitest";
-import { UserRole } from "../../../../src/common/types/db.js";
+import { type UserGender, UserRole } from "../../../../src/common/types/db.js";
 import type { AdminUser } from "../../../../src/features/admin/user/schemas/user.schema.js";
 import {
 	generatePassword,
@@ -15,7 +15,7 @@ describe("Admin", () => {
 		password: generatePassword(),
 		firstName: faker.person.firstName(),
 		lastName: faker.person.lastName(),
-		gender: faker.person.sexType(),
+		gender: faker.person.sexType() as UserGender,
 	};
 
 	const setup = async (app: TestApp) => {
@@ -54,7 +54,7 @@ describe("Admin", () => {
 			});
 		});
 
-		it("Should save changes into database when request is successfull", async () => {
+		it("Should save changes into database when request is successful", async () => {
 			await withTestApp(async (app) => {
 				const { session, userId } = await setup(app);
 

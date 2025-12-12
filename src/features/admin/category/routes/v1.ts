@@ -8,8 +8,8 @@ import {
 	CreateCategoryResponseSchema,
 } from "@/features/admin/category/schemas/create-category.schema.js";
 import {
+	GetAllCategoriesRequestQuerySchema,
 	GetAllCategoriesResponseSchema,
-	GetAllCatgoriesRequestQuerySchema,
 } from "@/features/admin/category/schemas/get-all-categories.schema.js";
 import {
 	RemoveCategoryRequestParamsSchema,
@@ -28,13 +28,14 @@ export const adminCategoryRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 		"/",
 		{
 			schema: {
-				querystring: GetAllCatgoriesRequestQuerySchema,
+				querystring: GetAllCategoriesRequestQuerySchema,
 				response: {
 					200: SuccessResponseSchema(GetAllCategoriesResponseSchema),
 					400: ValidationErrorResponseSchema,
 					401: ErrorResponseSchema,
 					403: ErrorResponseSchema,
 				},
+				tags: ["Admin/Category"],
 			},
 		},
 		async (req, reply) => {
@@ -58,6 +59,7 @@ export const adminCategoryRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 					401: ErrorResponseSchema,
 					403: ErrorResponseSchema,
 				},
+				tags: ["Admin/Category"],
 			},
 		},
 		async (req, reply) => {
@@ -82,6 +84,7 @@ export const adminCategoryRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 					401: ErrorResponseSchema,
 					403: ErrorResponseSchema,
 				},
+				tags: ["Admin/Category"],
 			},
 		},
 		async (req, reply) => {
@@ -105,6 +108,7 @@ export const adminCategoryRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 					401: ErrorResponseSchema,
 					403: ErrorResponseSchema,
 				},
+				tags: ["Admin/Category"],
 			},
 		},
 		async (req, reply) => {
