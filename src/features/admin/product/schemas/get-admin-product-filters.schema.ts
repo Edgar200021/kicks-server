@@ -8,7 +8,20 @@ export const GetAdminProductFiltersResponseSchema = z.object({
 			name: z.string().nonempty(),
 		})
 		.array(),
+
+	availableCategories: z
+		.object({
+			id: z.uuid().nonempty(),
+			name: z.string().nonempty(),
+		})
+		.array(),
 	brands: z
+		.object({
+			id: z.uuid().nonempty(),
+			name: z.string().nonempty(),
+		})
+		.array(),
+	availableBrands: z
 		.object({
 			id: z.uuid().nonempty(),
 			name: z.string().nonempty(),

@@ -1,16 +1,14 @@
 import z from "zod";
-import { PageCountSchema } from "@/common/schemas/index.js";
-import { PaginationSchema } from "@/common/schemas/pagination.schema.js";
-import { ProductGender } from "@/common/types/db.js";
+import {PageCountSchema} from "@/common/schemas/index.js";
+import {PaginationSchema} from "@/common/schemas/pagination.schema.js";
+import {ProductGender} from "@/common/types/db.js";
 import {
-	GET_ALL_ADMIN_PRODUCTS_BRAND_MAX_LENGTH,
-	GET_ALL_ADMIN_PRODUCTS_CATEGORY_MAX_LENGTH,
 	GET_ALL_ADMIN_PRODUCTS_DEFAULT_LIMIT,
 	GET_ALL_ADMIN_PRODUCTS_MAX_LIMIT,
 	GET_ALL_ADMIN_PRODUCTS_SEARCH_MAX_LENGTH,
 	GET_ALL_ADMIN_PRODUCTS_TAGS_MAX_LENGTH,
 } from "@/features/admin/product/const/zod.js";
-import { AdminProductSchema } from "@/features/admin/product/schemas/admin-product.schema.js";
+import {AdminProductSchema} from "@/features/admin/product/schemas/admin-product.schema.js";
 
 export const GetAllAdminProductsRequestQuerySchema = z
 	.object({
@@ -25,17 +23,15 @@ export const GetAllAdminProductsRequestQuerySchema = z
 			.transform((val) => val?.split(",").map(String))
 			.pipe(z.string().array().min(1))
 			.optional(),
-		category: z
-			.string()
+		categoryId: z
+			.uuid()
 			.trim()
 			.nonempty()
-			.max(GET_ALL_ADMIN_PRODUCTS_CATEGORY_MAX_LENGTH)
 			.optional(),
-		brand: z
-			.string()
+		brandId: z
+			.uuid()
 			.trim()
 			.nonempty()
-			.max(GET_ALL_ADMIN_PRODUCTS_BRAND_MAX_LENGTH)
 			.optional(),
 		isDeleted: z
 			.enum(["true", "false"])
@@ -55,7 +51,7 @@ export const GetAllAdminProductsRequestQuerySchema = z
 			!obj.startDate || !obj.endDate
 				? true
 				: obj.endDate.getTime() > obj.startDate.getTime(),
-		{ path: ["startDate"] },
+		{path: ["startDate"]},
 	);
 
 export const GetAllAdminProductsResponseSchema = z

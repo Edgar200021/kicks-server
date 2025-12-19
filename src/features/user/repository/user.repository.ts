@@ -1,19 +1,72 @@
-import type { Kysely } from "kysely";
-import type { DB } from "@/common/types/db.js";
-import { deleteNotVerified } from "@/features/user/repository/delete-not-verified.js";
-import { create } from "./create.js";
-import { getByEmail } from "./get-by-email.js";
-import { getByGoogleId } from "./get-by-google-id.js";
-import { getById } from "./get-by-id.js";
-import { updateById } from "./update-by-id.js";
+import {Insertable, Kysely, Selectable, sql, Updateable} from "kysely";
+import type {DB, Users} from "@/common/types/db.js";
 
 export class UserRepository {
-	getById = getById;
-	getByGoogleId = getByGoogleId;
-	getByEmail = getByEmail;
-	create = create;
-	updateById = updateById;
-	deleteNotVerified = deleteNotVerified;
+	constructor(readonly db: Kysely<DB>) {
+	}
 
-	constructor(readonly db: Kysely<DB>) {}
+	async getById(
+		id: Selectable<Users>["id"],
+	): Promise<Selectable<Users> | undefined> {
+		return await this.db
+			.selectFrom("users")
+			.selectAll()
+			.where("id", "=", id)
+			.executeTakeFirst();
+	}
+
+	async getByEmail(
+		this: UserRepository,
+		email: Selectable<Users>["email"],
+	): Promise<Selectable<Users> | undefined> {
+		return await this.db
+			.selectFrom("users")
+			.selectAll()
+			.where("email", "=", email)
+			.executeTakeFirst();
+	}
+
+	async create(
+		user: Insertable<Users>,
+	): Promise<Selectable<Users>> {
+		return await this.db
+			.insertInto("users")
+			.values(user)
+			.returningAll()
+			.executeTakeFirstOrThrow();
+	}
+
+
+	async updateById(
+		id: Selectable<Users>["id"],
+		user: Updateable<Users>,
+	): Promise<Selectable<Users>["id"]> {
+		const {id: userId} = await this.db
+			.updateTable("users")
+			.set(user)
+			.where("id", "=", id)
+			.returning("id")
+			.executeTakeFirstOrThrow();
+
+		return userId;
+	}
+
+	async deleteNotVerified(
+		this: UserRepository,
+	): Promise<Pick<Selectable<Users>, "id">[]> {
+		return await this.db
+			.deleteFrom("users")
+			.where((eb) =>
+				eb.and([
+					eb("isVerified", "=", false),
+					eb("createdAt", "<", sql<Date>`now
+              ()
+              - INTERVAL '1 day'`),
+				]),
+			)
+			.returning(["id"])
+			.execute();
+	}
+
+
 }

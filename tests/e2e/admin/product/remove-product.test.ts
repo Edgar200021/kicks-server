@@ -2,7 +2,13 @@ import {faker} from "@faker-js/faker";
 import type {Selectable} from "kysely";
 import {Headers} from "undici";
 import {describe, expect, it} from "vitest";
-import {type Category, type UserGender, UserRole,} from "../../../../src/common/types/db.js";
+import {
+	type Brand,
+	type Category,
+	type Product,
+	type UserGender,
+	UserRole,
+} from "../../../../src/common/types/db.js";
 
 import {generatePassword, type TestApp, withTestApp,} from "../../../testApp.js";
 
@@ -18,7 +24,7 @@ describe("Admin", () => {
 	const setup = async (app: TestApp) => {
 		const session = await app.createAdminUser(signUpData);
 
-		const getCategoriesRes = await app.getAllCategories({
+		const res = await app.getAllAdminProducts({
 			headers: new Headers({
 				Cookie: session,
 			}),
@@ -26,22 +32,29 @@ describe("Admin", () => {
 				limit: 1,
 			},
 		});
-
-		expect(getCategoriesRes.statusCode).toBe(200);
+		expect(res.statusCode).toBe(200);
 
 		return {
 			session,
-			categories: (await getCategoriesRes.body.json())
-				.data as Selectable<Category>[],
+			product: (
+				(await res.body.json()) as {
+					data: {
+						products: (Selectable<Product> & {
+							category: Pick<Selectable<Category>, "id" | "name"> | null;
+							brand: Pick<Selectable<Brand>, "id" | "name"> | null;
+						})[];
+					};
+				}
+			).data.products[0],
 		};
 	};
 
-	describe("Remove category", () => {
+	describe("Remove product", () => {
 		it("Should return 200 status code when request is successful", async () => {
 			await withTestApp(async (app) => {
-				const {session, categories} = await setup(app);
+				const {session, product} = await setup(app);
 
-				const res = await app.removeCategory(categories[0].id, {
+				const res = await app.removeProduct(product.id, {
 					headers: new Headers({
 						Cookie: session,
 					}),
@@ -53,26 +66,25 @@ describe("Admin", () => {
 
 		it("Should be deleted from database when request is successful", async () => {
 			await withTestApp(async (app) => {
-				const {session, categories} = await setup(app);
+				const {session, product} = await setup(app);
 
-				const res = await app.removeCategory(categories[0].id, {
+				const res = await app.removeProduct(product.id, {
 					headers: new Headers({
 						Cookie: session,
 					}),
 				});
 				expect(res.statusCode).toBe(200);
 
-				const dbCategory = await app.db
-					.selectFrom("category")
-					.select("name")
-					.where("id", "=", categories[0].id)
+				const dbProduct = await app.db
+					.selectFrom("product")
+					.where("id", "=", product.id)
 					.executeTakeFirst();
 
-				expect(dbCategory).toBeUndefined();
+				expect(dbProduct).toBeUndefined();
 			});
 		});
 
-		it("Should return 400 status code when categoryId is invalid", async () => {
+		it("Should return 400 status code when productId is invalid", async () => {
 			await withTestApp(async (app) => {
 				const session = await app.createAdminUser(signUpData);
 
@@ -89,7 +101,7 @@ describe("Admin", () => {
 
 				await Promise.all(
 					testCases.map(async ({name, id}) => {
-						const res = await app.removeCategory(id as string, {
+						const res = await app.removeProduct(id as string, {
 							headers: new Headers({
 								Cookie: session,
 							}),
@@ -103,7 +115,7 @@ describe("Admin", () => {
 
 		it("Should return 401 status code user is not authenticated", async () => {
 			await withTestApp(async (app) => {
-				const res = await app.removeCategory(faker.string.uuid());
+				const res = await app.removeProduct(faker.string.uuid());
 
 				expect(res.statusCode).toEqual(401);
 			});
@@ -115,7 +127,7 @@ describe("Admin", () => {
 					body: JSON.stringify(signUpData),
 				});
 
-				const res = await app.removeCategory(faker.string.uuid(), {
+				const res = await app.removeProduct(faker.string.uuid(), {
 					headers: new Headers({
 						Cookie: session,
 					}),
@@ -125,11 +137,11 @@ describe("Admin", () => {
 			});
 		});
 
-		it("Should return 404 status code when category doesn't exist", async () => {
+		it("Should return 404 status code when product doesn't exist", async () => {
 			await withTestApp(async (app) => {
 				const session = await app.createAdminUser(signUpData);
 
-				const res = await app.removeCategory(faker.string.uuid(), {
+				const res = await app.removeProduct(faker.string.uuid(), {
 					headers: new Headers({
 						Cookie: session,
 					}),

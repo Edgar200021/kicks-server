@@ -1,5 +1,5 @@
 import z from "zod";
-import {ProductGender} from "@/common/types/db.js";
+import { ProductGender } from "@/common/types/db.js";
 import {
 	PRODUCT_DESCRIPTION_MAX_LENGTH,
 	PRODUCT_DESCRIPTION_MIN_LENGTH,
@@ -11,22 +11,24 @@ export const CreateProductRequestSchema = z.object({
 	title: z
 		.string()
 		.nonempty()
+		.trim()
 		.min(PRODUCT_TITLE_MIN_LENGTH)
 		.max(PRODUCT_TITLE_MAX_LENGTH),
 	description: z
 		.string()
+		.trim()
 		.nonempty()
 		.min(PRODUCT_DESCRIPTION_MIN_LENGTH)
 		.max(PRODUCT_DESCRIPTION_MAX_LENGTH),
 	gender: z.enum(ProductGender),
-	tags: z.string().nonempty().array().optional().default([]),
-	categoryId: z.uuid().nonempty(),
-	brandId: z.uuid().nonempty(),
+	tags: z.string().trim().nonempty().array().optional().default([]),
+	categoryId: z.uuid().trim().nonempty(),
+	brandId: z.uuid().trim().nonempty(),
 });
 
 export const CreateProductResponseSchema = z.object({
-	id: z.uuid().nonempty()
-})
+	id: z.uuid().nonempty(),
+});
 
 export type CreateProductRequest = z.infer<typeof CreateProductRequestSchema>;
 export type CreateProductResponse = z.infer<typeof CreateProductResponseSchema>;

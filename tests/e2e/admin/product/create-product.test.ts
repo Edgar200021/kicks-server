@@ -1,14 +1,23 @@
-import {faker} from "@faker-js/faker";
-import {Headers} from "undici";
-import {describe, expect, it} from "vitest";
-import {ProductGender, type UserGender, UserRole} from "../../../../src/common/types/db.js";
-import {generatePassword, omit, type TestApp, withTestApp,} from "../../../testApp.js";
+import { faker } from "@faker-js/faker";
+import { Headers } from "undici";
+import { describe, expect, it } from "vitest";
+import {
+	ProductGender,
+	type UserGender,
+	UserRole,
+} from "../../../../src/common/types/db.js";
 import {
 	PRODUCT_DESCRIPTION_MAX_LENGTH,
 	PRODUCT_DESCRIPTION_MIN_LENGTH,
 	PRODUCT_TITLE_MAX_LENGTH,
-	PRODUCT_TITLE_MIN_LENGTH
+	PRODUCT_TITLE_MIN_LENGTH,
 } from "../../../../src/features/admin/product/const/zod.js";
+import {
+	generatePassword,
+	omit,
+	type TestApp,
+	withTestApp,
+} from "../../../testApp.js";
 
 describe("Admin", () => {
 	const signUpData = {
@@ -31,24 +40,28 @@ describe("Admin", () => {
 		expect(res.statusCode).toBe(200);
 		return {
 			session,
-			filters: (await res.body.json() as {
-				data: {
-					categories: { id: string, name: string }[],
-					brands: { id: string, name: string }[]
+			filters: (
+				(await res.body.json()) as {
+					data: {
+						categories: { id: string; name: string }[];
+						brands: { id: string; name: string }[];
+					};
 				}
-			}).data
+			).data,
 		};
 	};
 
 	describe("Create Product", () => {
 		it("Should return 201 status code when request is successful", async () => {
 			await withTestApp(async (app) => {
-				const {session, filters} = await setup(app);
+				const { session, filters } = await setup(app);
 
 				const res = await app.createProduct({
 					body: JSON.stringify({
-						title: faker.string.alpha({length: PRODUCT_TITLE_MAX_LENGTH}),
-						description: faker.string.alpha({length: PRODUCT_DESCRIPTION_MAX_LENGTH}),
+						title: faker.string.alpha({ length: PRODUCT_TITLE_MAX_LENGTH }),
+						description: faker.string.alpha({
+							length: PRODUCT_DESCRIPTION_MAX_LENGTH,
+						}),
 						gender: ProductGender.Men,
 						categoryId: filters.categories[0].id,
 						brandId: filters.brands[0].id,
@@ -56,10 +69,7 @@ describe("Admin", () => {
 					headers: new Headers({
 						Cookie: session,
 					}),
-				})
-
-
-				console.debug({data: await res.body.json()})
+				});
 
 				expect(res.statusCode).toBe(201);
 			});
@@ -67,12 +77,14 @@ describe("Admin", () => {
 
 		it("Should be saved into database when request is successful", async () => {
 			await withTestApp(async (app) => {
-				const {session, filters} = await setup(app);
+				const { session, filters } = await setup(app);
 
 				const res = await app.createProduct({
 					body: JSON.stringify({
-						title: faker.string.alpha({length: PRODUCT_TITLE_MAX_LENGTH}),
-						description: faker.string.alpha({length: PRODUCT_DESCRIPTION_MAX_LENGTH}),
+						title: faker.string.alpha({ length: PRODUCT_TITLE_MAX_LENGTH }),
+						description: faker.string.alpha({
+							length: PRODUCT_DESCRIPTION_MAX_LENGTH,
+						}),
 						gender: ProductGender.Men,
 						categoryId: filters.categories[0].id,
 						brandId: filters.brands[0].id,
@@ -84,7 +96,9 @@ describe("Admin", () => {
 
 				expect(res.statusCode).toBe(201);
 
-				const {data: {id}} = await res.body.json() as { data: { id: string } }
+				const {
+					data: { id },
+				} = (await res.body.json()) as { data: { id: string } };
 
 				const dbProduct = await app.db
 					.selectFrom("product")
@@ -98,80 +112,96 @@ describe("Admin", () => {
 
 		it("Should return 400 status code when data is invalid", async () => {
 			await withTestApp(async (app) => {
-				const {session, filters} = await setup(app)
+				const { session, filters } = await setup(app);
 
 				const product = {
-					title: faker.string.alpha({length: PRODUCT_TITLE_MAX_LENGTH}),
-					description: faker.string.alpha({length: PRODUCT_DESCRIPTION_MAX_LENGTH}),
+					title: faker.string.alpha({ length: PRODUCT_TITLE_MAX_LENGTH }),
+					description: faker.string.alpha({
+						length: PRODUCT_DESCRIPTION_MAX_LENGTH,
+					}),
 					gender: ProductGender.Men,
 					categoryId: filters.categories[0].id,
 					brandId: filters.brands[0].id,
-				}
+				};
 
 				const testCases = [
 					{
 						name: "title is missing",
-						data: omit(product, "title")
+						data: omit(product, "title"),
 					},
 					{
 						name: "title is too short",
-						data: {...product, title: faker.string.alpha({length: PRODUCT_TITLE_MIN_LENGTH - 1})}
+						data: {
+							...product,
+							title: faker.string.alpha({
+								length: PRODUCT_TITLE_MIN_LENGTH - 1,
+							}),
+						},
 					},
 					{
 						name: "title is too long",
-						data: {...product, title: faker.string.alpha({length: PRODUCT_TITLE_MAX_LENGTH + 1})}
+						data: {
+							...product,
+							title: faker.string.alpha({
+								length: PRODUCT_TITLE_MAX_LENGTH + 1,
+							}),
+						},
 					},
 					{
 						name: "description is missing",
-						data: omit(product, "description")
+						data: omit(product, "description"),
 					},
 					{
 						name: "description is too short",
 						data: {
 							...product,
-							description: faker.string.alpha({length: PRODUCT_DESCRIPTION_MIN_LENGTH - 1})
-						}
+							description: faker.string.alpha({
+								length: PRODUCT_DESCRIPTION_MIN_LENGTH - 1,
+							}),
+						},
 					},
 					{
 						name: "description is too long",
 						data: {
 							...product,
-							description: faker.string.alpha({length: PRODUCT_DESCRIPTION_MAX_LENGTH + 1})
-						}
+							description: faker.string.alpha({
+								length: PRODUCT_DESCRIPTION_MAX_LENGTH + 1,
+							}),
+						},
 					},
 					{
 						name: "tag is empty array",
-						data: {...product, tags: ['']}
+						data: { ...product, tags: [""] },
 					},
 					{
 						name: "invalid gender",
-						data: {...product, gender: 'invalid gender'}
+						data: { ...product, gender: "invalid gender" },
 					},
 					{
 						name: "categoryId is missing",
-						data: omit(product, "categoryId")
+						data: omit(product, "categoryId"),
 					},
 					{
 						name: "categoryId is not uuid",
-						data: {...product, categoryId: "invalid id"}
+						data: { ...product, categoryId: "invalid id" },
 					},
 					{
 						name: "brandId is missing",
-						data: omit(product, "brandId")
+						data: omit(product, "brandId"),
 					},
 					{
 						name: "brandId is not uuid",
-						data: {...product, brandId: "invalid id"}
+						data: { ...product, brandId: "invalid id" },
 					},
 				];
 
 				await Promise.all(
-					testCases.map(async ({name, data}) => {
+					testCases.map(async ({ name, data }) => {
 						const res = await app.createProduct({
 							headers: new Headers({
 								Cookie: session,
 							}),
-							body: JSON.stringify(data)
+							body: JSON.stringify(data),
 						});
 
 						expect(res.statusCode, `${name} → wrong status`).toBe(400);
@@ -180,15 +210,16 @@ describe("Admin", () => {
 			});
 		});
 
-
-		it("Should return 400 status code when data is invalid", async () => {
+		it("Should return 400 status code when product already exists", async () => {
 			await withTestApp(async (app) => {
-				const {session, filters} = await setup(app)
+				const { session, filters } = await setup(app);
 
 				const res = await app.createProduct({
 					body: JSON.stringify({
-						title: faker.string.alpha({length: PRODUCT_TITLE_MAX_LENGTH}),
-						description: faker.string.alpha({length: PRODUCT_DESCRIPTION_MAX_LENGTH}),
+						title: faker.string.alpha({ length: PRODUCT_TITLE_MAX_LENGTH }),
+						description: faker.string.alpha({
+							length: PRODUCT_DESCRIPTION_MAX_LENGTH,
+						}),
 						gender: ProductGender.Men,
 						categoryId: filters.categories[0].id,
 						brandId: filters.brands[0].id,
@@ -200,7 +231,9 @@ describe("Admin", () => {
 
 				expect(res.statusCode).toBe(201);
 
-				const {data: {id}} = await res.body.json() as { data: { id: string } }
+				const {
+					data: { id },
+				} = (await res.body.json()) as { data: { id: string } };
 
 				const dbProduct = await app.db
 					.selectFrom("product")
@@ -210,11 +243,12 @@ describe("Admin", () => {
 
 				expect(dbProduct).toBeDefined();
 
-
 				const secondRes = await app.createProduct({
 					body: JSON.stringify({
 						title: dbProduct.title,
-						description: faker.string.alpha({length: PRODUCT_DESCRIPTION_MAX_LENGTH}),
+						description: faker.string.alpha({
+							length: PRODUCT_DESCRIPTION_MAX_LENGTH,
+						}),
 						gender: ProductGender.Men,
 						categoryId: filters.categories[0].id,
 						brandId: filters.brands[0].id,
@@ -224,9 +258,9 @@ describe("Admin", () => {
 					}),
 				});
 
-				expect(secondRes.statusCode).toBe(400)
-			})
-		})
+				expect(secondRes.statusCode).toBe(400);
+			});
+		});
 
 		it("Should return 401 status code user is not authenticated", async () => {
 			await withTestApp(async (app) => {
@@ -254,40 +288,41 @@ describe("Admin", () => {
 
 		it("Should return 404 status code when category or brand doesn't exist", async () => {
 			await withTestApp(async (app) => {
-				const {session, filters} = await setup(app)
+				const { session, filters } = await setup(app);
 
 				const product = {
-					title: faker.string.alpha({length: PRODUCT_TITLE_MAX_LENGTH}),
-					description: faker.string.alpha({length: PRODUCT_DESCRIPTION_MAX_LENGTH}),
+					title: faker.string.alpha({ length: PRODUCT_TITLE_MAX_LENGTH }),
+					description: faker.string.alpha({
+						length: PRODUCT_DESCRIPTION_MAX_LENGTH,
+					}),
 					gender: ProductGender.Men,
 					categoryId: filters.categories[0].id,
 					brandId: filters.brands[0].id,
-				}
+				};
 
-
-				const testCases = [{
-					name: "category not found",
-					data: {...product, categoryId: faker.string.uuid()}
-				},
+				const testCases = [
+					{
+						name: "category not found",
+						data: { ...product, categoryId: faker.string.uuid() },
+					},
 					{
 						name: "brand not found",
-						data: {...product, brandId: faker.string.uuid()}
-					}
-				]
+						data: { ...product, brandId: faker.string.uuid() },
+					},
+				];
 
 				await Promise.all(
-					testCases.map(async ({name, data}) => {
+					testCases.map(async ({ name, data }) => {
 						const res = await app.createProduct({
 							headers: new Headers({
 								Cookie: session,
 							}),
-							body: JSON.stringify(data)
+							body: JSON.stringify(data),
 						});
 
 						expect(res.statusCode, `${name} → wrong status`).toBe(404);
 					}),
 				);
-
 			});
 		});
 	});

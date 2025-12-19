@@ -10,7 +10,13 @@ import {
 	SESSION_PREFIX,
 	VERIFICATION_PREFIX,
 } from "../src/common/const/index.js";
-import {type Brand, type Category, UserRole, type Users,} from "../src/common/types/db.js";
+import {
+	type Brand,
+	type Category,
+	type Product,
+	UserRole,
+	type Users,
+} from "../src/common/types/db.js";
 import {deepFreeze} from "../src/common/utils/index.js";
 import {setupConfig} from "../src/config/config.js";
 import {PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH,} from "../src/features/auth/const/zod.js";
@@ -386,6 +392,29 @@ const createTestApp = async () => {
 			return request(`${address}/api/v1/admin/product`, {
 				...options,
 				method: "POST",
+				headers: buildHeaders(options?.headers),
+			});
+		},
+
+		async updateProduct(
+			id: Selectable<Product>["id"],
+			options?: RequestOptions,
+		) {
+			return request(`${address}/api/v1/admin/product/${id}`, {
+				...options,
+				method: "PATCH",
+				headers: buildHeaders(options?.headers),
+			});
+		},
+
+		async removeProduct(
+			id: Selectable<Product>["id"],
+			options?: RequestOptions,
+		) {
+			return request(`${address}/api/v1/admin/product/${id}`, {
+				...options,
+				method: "DELETE",
+				body: JSON.stringify({}),
 				headers: buildHeaders(options?.headers),
 			});
 		},

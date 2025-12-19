@@ -4,12 +4,16 @@ import {
 	type Nullable,
 	type OperandExpression,
 	type Selectable,
-	type SqlBool,
 	sql,
+	type SqlBool,
 } from "kysely";
-import type { Brand, Category, DB, Product } from "@/common/types/db.js";
-import type { AdminProductRepository } from "@/features/admin/product/repository/admin-product.repository.js";
-import type { GetAllAdminProductsRequestQuery } from "@/features/admin/product/schemas/get-all-admin-products.schema.js";
+import type {Brand, Category, DB, Product} from "@/common/types/db.js";
+import type {
+	AdminProductRepository
+} from "@/features/admin/product/repository/admin-product.repository.js";
+import type {
+	GetAllAdminProductsRequestQuery
+} from "@/features/admin/product/schemas/get-all-admin-products.schema.js";
 
 export async function getAll(
 	this: AdminProductRepository,
@@ -45,7 +49,7 @@ export async function getAll(
 		.offset(query.limit * query.page - query.limit)
 		.execute();
 
-	const { count } = await this.db
+	const {count} = await this.db
 		.selectFrom("product as p")
 		.leftJoin("category as c", "c.id", "p.categoryId")
 		.leftJoin("brand as b", "b.id", "p.brandId")
@@ -56,13 +60,13 @@ export async function getAll(
 	return {
 		count: Number(count),
 		products: products.map(
-			({ categoryId, categoryName, brandId, brandName, ...p }) => ({
+			({categoryId, categoryName, brandId, brandName, ...p}) => ({
 				...p,
 				category:
 					categoryId && categoryName
-						? { id: categoryId, name: categoryName }
+						? {id: categoryId, name: categoryName}
 						: null,
-				brand: brandId && brandName ? { id: brandId, name: brandName } : null,
+				brand: brandId && brandName ? {id: brandId, name: brandName} : null,
 			}),
 		),
 	};
@@ -71,12 +75,12 @@ export async function getAll(
 function buildFilters(
 	eb: ExpressionBuilder<
 		DB & {
-			p: Product;
-		} & {
-			c: Nullable<Category>;
-		} & {
-			b: Nullable<Brand>;
-		},
+		p: Product;
+	} & {
+		c: Nullable<Category>;
+	} & {
+		b: Nullable<Brand>;
+	},
 		"p" | "c" | "b"
 	>,
 	query: GetAllAdminProductsRequestQuery,
@@ -118,12 +122,12 @@ function buildFilters(
 		);
 	}
 
-	if (query.category) {
-		ands.push(eb("c.name", "=", query.category));
+	if (query.categoryId) {
+		ands.push(eb("p.categoryId", "=", query.categoryId));
 	}
 
-	if (query.brand) {
-		ands.push(eb("b.name", "=", query.brand));
+	if (query.brandId) {
+		ands.push(eb("p.brandId", "=", query.brandId));
 	}
 
 	return eb.and(ands);
