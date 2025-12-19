@@ -54,7 +54,12 @@ export class AdminProductRepository {
 		id: Selectable<Product>["id"],
 	) {
 		const result = await this.db
-			.deleteFrom("product")
+			.updateTable("product")
+			.set({
+				updatedAt: sql`NOW
+            ()`,
+				isDeleted: sql<boolean>`NOT "is_deleted"`,
+			})
 			.where("id", "=", id)
 			.returning("id")
 			.executeTakeFirst();

@@ -64,7 +64,7 @@ describe("Admin", () => {
 			});
 		});
 
-		it("Should be deleted from database when request is successful", async () => {
+		it("Should apply changes into database when request is successful", async () => {
 			await withTestApp(async (app) => {
 				const {session, product} = await setup(app);
 
@@ -77,10 +77,11 @@ describe("Admin", () => {
 
 				const dbProduct = await app.db
 					.selectFrom("product")
+					.select("isDeleted")
 					.where("id", "=", product.id)
-					.executeTakeFirst();
+					.executeTakeFirstOrThrow();
 
-				expect(dbProduct).toBeUndefined();
+				expect(dbProduct.isDeleted).toBe(!product.isDeleted)
 			});
 		});
 

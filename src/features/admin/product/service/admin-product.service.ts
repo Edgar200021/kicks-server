@@ -74,7 +74,6 @@ export class AdminProductService {
 		if (!id) throw httpErrors.notFound(`Product with id ${params.id} not found`);
 	}
 
-
 	async getFilters(): Promise<GetAdminProductFiltersResponse> {
 		return await this.productRepository.getFilters();
 	}
