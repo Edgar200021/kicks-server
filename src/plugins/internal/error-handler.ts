@@ -12,6 +12,15 @@ export default fp(async (fastify) => {
 				error: "You hit the rate limit! Slow down please!",
 			});
 		}
+		if (err instanceof fastify.multipartErrors.RequestFileTooLargeError) {
+			//@ts-ignore
+			const fieldName = err.part?.fieldname
+
+			return reply.code(400).send({
+				statusCode: 400,
+				errors: {[fieldName]: "File too large"}
+			})
+		}
 
 		if (hasZodFastifySchemaValidationErrors(err)) {
 			return reply.code(400).send({
@@ -27,6 +36,7 @@ export default fp(async (fastify) => {
 				}, {}),
 			});
 		}
+
 
 		if (isResponseSerializationError(err)) {
 			fastify.log.error(
@@ -53,7 +63,7 @@ export default fp(async (fastify) => {
 		if (err instanceof fastify.httpErrors.HttpError && err.statusCode < 500) {
 			return reply
 				.status(err.statusCode)
-				.send({ statusCode: err.statusCode, error: err.message });
+				.send({statusCode: err.statusCode, error: err.message});
 		}
 
 		fastify.log.error(
@@ -69,6 +79,6 @@ export default fp(async (fastify) => {
 			"Unhandled error occurred",
 		);
 
-		reply.status(500).send({ statusCode: 500, error: "Internal Server Error" });
+		reply.status(500).send({statusCode: 500, error: "Internal Server Error"});
 	});
 });

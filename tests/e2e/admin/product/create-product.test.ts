@@ -1,23 +1,14 @@
-import { faker } from "@faker-js/faker";
-import { Headers } from "undici";
-import { describe, expect, it } from "vitest";
-import {
-	ProductGender,
-	type UserGender,
-	UserRole,
-} from "../../../../src/common/types/db.js";
+import {faker} from "@faker-js/faker";
+import {Headers} from "undici";
+import {describe, expect, it} from "vitest";
+import {ProductGender, type UserGender, UserRole,} from "../../../../src/common/types/db.js";
 import {
 	PRODUCT_DESCRIPTION_MAX_LENGTH,
 	PRODUCT_DESCRIPTION_MIN_LENGTH,
 	PRODUCT_TITLE_MAX_LENGTH,
 	PRODUCT_TITLE_MIN_LENGTH,
 } from "../../../../src/features/admin/product/const/zod.js";
-import {
-	generatePassword,
-	omit,
-	type TestApp,
-	withTestApp,
-} from "../../../testApp.js";
+import {generatePassword, omit, type TestApp, withTestApp,} from "../../../testApp.js";
 
 describe("Admin", () => {
 	const signUpData = {
@@ -54,11 +45,11 @@ describe("Admin", () => {
 	describe("Create Product", () => {
 		it("Should return 201 status code when request is successful", async () => {
 			await withTestApp(async (app) => {
-				const { session, filters } = await setup(app);
+				const {session, filters} = await setup(app);
 
 				const res = await app.createProduct({
 					body: JSON.stringify({
-						title: faker.string.alpha({ length: PRODUCT_TITLE_MAX_LENGTH }),
+						title: faker.string.alpha({length: PRODUCT_TITLE_MAX_LENGTH}),
 						description: faker.string.alpha({
 							length: PRODUCT_DESCRIPTION_MAX_LENGTH,
 						}),
@@ -77,11 +68,11 @@ describe("Admin", () => {
 
 		it("Should be saved into database when request is successful", async () => {
 			await withTestApp(async (app) => {
-				const { session, filters } = await setup(app);
+				const {session, filters} = await setup(app);
 
 				const res = await app.createProduct({
 					body: JSON.stringify({
-						title: faker.string.alpha({ length: PRODUCT_TITLE_MAX_LENGTH }),
+						title: faker.string.alpha({length: PRODUCT_TITLE_MAX_LENGTH}),
 						description: faker.string.alpha({
 							length: PRODUCT_DESCRIPTION_MAX_LENGTH,
 						}),
@@ -97,7 +88,7 @@ describe("Admin", () => {
 				expect(res.statusCode).toBe(201);
 
 				const {
-					data: { id },
+					data: {id},
 				} = (await res.body.json()) as { data: { id: string } };
 
 				const dbProduct = await app.db
@@ -112,10 +103,10 @@ describe("Admin", () => {
 
 		it("Should return 400 status code when data is invalid", async () => {
 			await withTestApp(async (app) => {
-				const { session, filters } = await setup(app);
+				const {session, filters} = await setup(app);
 
 				const product = {
-					title: faker.string.alpha({ length: PRODUCT_TITLE_MAX_LENGTH }),
+					title: faker.string.alpha({length: PRODUCT_TITLE_MAX_LENGTH}),
 					description: faker.string.alpha({
 						length: PRODUCT_DESCRIPTION_MAX_LENGTH,
 					}),
@@ -171,11 +162,11 @@ describe("Admin", () => {
 					},
 					{
 						name: "tag is empty array",
-						data: { ...product, tags: [""] },
+						data: {...product, tags: [""]},
 					},
 					{
 						name: "invalid gender",
-						data: { ...product, gender: "invalid gender" },
+						data: {...product, gender: "invalid gender"},
 					},
 					{
 						name: "categoryId is missing",
@@ -183,7 +174,7 @@ describe("Admin", () => {
 					},
 					{
 						name: "categoryId is not uuid",
-						data: { ...product, categoryId: "invalid id" },
+						data: {...product, categoryId: "invalid id"},
 					},
 					{
 						name: "brandId is missing",
@@ -191,12 +182,12 @@ describe("Admin", () => {
 					},
 					{
 						name: "brandId is not uuid",
-						data: { ...product, brandId: "invalid id" },
+						data: {...product, brandId: "invalid id"},
 					},
 				];
 
 				await Promise.all(
-					testCases.map(async ({ name, data }) => {
+					testCases.map(async ({name, data}) => {
 						const res = await app.createProduct({
 							headers: new Headers({
 								Cookie: session,
@@ -212,11 +203,11 @@ describe("Admin", () => {
 
 		it("Should return 400 status code when product already exists", async () => {
 			await withTestApp(async (app) => {
-				const { session, filters } = await setup(app);
+				const {session, filters} = await setup(app);
 
 				const res = await app.createProduct({
 					body: JSON.stringify({
-						title: faker.string.alpha({ length: PRODUCT_TITLE_MAX_LENGTH }),
+						title: faker.string.alpha({length: PRODUCT_TITLE_MAX_LENGTH}),
 						description: faker.string.alpha({
 							length: PRODUCT_DESCRIPTION_MAX_LENGTH,
 						}),
@@ -232,7 +223,7 @@ describe("Admin", () => {
 				expect(res.statusCode).toBe(201);
 
 				const {
-					data: { id },
+					data: {id},
 				} = (await res.body.json()) as { data: { id: string } };
 
 				const dbProduct = await app.db
@@ -288,10 +279,10 @@ describe("Admin", () => {
 
 		it("Should return 404 status code when category or brand doesn't exist", async () => {
 			await withTestApp(async (app) => {
-				const { session, filters } = await setup(app);
+				const {session, filters} = await setup(app);
 
 				const product = {
-					title: faker.string.alpha({ length: PRODUCT_TITLE_MAX_LENGTH }),
+					title: faker.string.alpha({length: PRODUCT_TITLE_MAX_LENGTH}),
 					description: faker.string.alpha({
 						length: PRODUCT_DESCRIPTION_MAX_LENGTH,
 					}),
@@ -303,16 +294,16 @@ describe("Admin", () => {
 				const testCases = [
 					{
 						name: "category not found",
-						data: { ...product, categoryId: faker.string.uuid() },
+						data: {...product, categoryId: faker.string.uuid()},
 					},
 					{
 						name: "brand not found",
-						data: { ...product, brandId: faker.string.uuid() },
+						data: {...product, brandId: faker.string.uuid()},
 					},
 				];
 
 				await Promise.all(
-					testCases.map(async ({ name, data }) => {
+					testCases.map(async ({name, data}) => {
 						const res = await app.createProduct({
 							headers: new Headers({
 								Cookie: session,

@@ -2,9 +2,11 @@ import {randomUUID} from "node:crypto";
 import {RedisContainer} from "@testcontainers/redis";
 import {Redis} from "ioredis";
 import type {Selectable} from "kysely";
-import {type Dispatcher, Headers, request} from "undici";
+import {type Dispatcher, FormData, Headers, request} from "undici";
 import type {UndiciHeaders} from "undici/types/dispatcher.js";
 import {buildApp} from "../src/app.js";
+import {v2 as cloudinary,} from "cloudinary";
+
 import {
 	RESET_PASSWORD_PREFIX,
 	SESSION_PREFIX,
@@ -14,6 +16,7 @@ import {
 	type Brand,
 	type Category,
 	type Product,
+	ProductSku,
 	UserRole,
 	type Users,
 } from "../src/common/types/db.js";
@@ -22,6 +25,8 @@ import {setupConfig} from "../src/config/config.js";
 import {PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH,} from "../src/features/auth/const/zod.js";
 import type {SignUpRequest} from "../src/features/auth/schemas/sign-up.schema.js";
 import {setupTestDb} from "./setupTestDb.js";
+import path from "node:path";
+import fs from "node:fs";
 
 const UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const LOWERCASE = "abcdefghijklmnopqrstuvwxyz";
@@ -54,10 +59,11 @@ export const generatePassword = () => {
 	return chars.join("");
 };
 
+
 export type TestApp = Awaited<ReturnType<typeof createTestApp>>;
 type RequestOptions = Partial<Omit<Dispatcher.RequestOptions, "method">>;
 
-const buildHeaders = (headers?: UndiciHeaders) => {
+const buildHeaders = (headers?: UndiciHeaders, json: boolean = true) => {
 	return (
 		Array.isArray(headers)
 			? headers
@@ -77,7 +83,7 @@ const buildHeaders = (headers?: UndiciHeaders) => {
 			}
 			return result;
 		},
-		new Headers({"Content-Type": "application/json"}),
+		new Headers(json ? {"Content-Type": "application/json"} : {}),
 	);
 };
 
@@ -98,9 +104,35 @@ export const omit = <T extends Record<string, unknown>>(
 	return copied;
 };
 
+export const buildFormData = (data: Record<string, number | string | File
+	| (string | number | File)[]>): FormData => {
+	return Object.entries(data).reduce((form, [key, value]) => {
+		if (Array.isArray(value)) {
+			for (const val of value) {
+				form.append(key, val)
+			}
+
+			return form
+		}
+
+		form.append(key, value)
+		return form
+	}, new FormData())
+}
+
+export const buildFile = (data: { format: "pdf" } | { "format": "image", big: boolean } = {
+	format: "image",
+	big: false
+}) => {
+	const fileName = data.format === "pdf" ? "sample.pdf" : data.big ? "8k.jpg" : "mountain.jpg"
+	const type = data.format === "pdf" ? "application/pdf" : "image/jpeg"
+
+	return new File([fs.readFileSync(path.join(__dirname, "assets", fileName))], fileName, {type})
+}
+
+
 const createTestApp = async () => {
 	const config = setupConfig();
-
 	const redisContainer = await new RedisContainer("redis:7")
 		.withExposedPorts(6379)
 		.start();
@@ -122,14 +154,20 @@ const createTestApp = async () => {
 		port: config.redis.port,
 		password: config.redis.password,
 	});
-	const app = await buildApp(config);
+	const app = await buildApp(config)
+
+	cloudinary.config({
+		cloud_name: config.cloudinary.cloudName,
+		api_key: config.cloudinary.apiKey,
+		api_secret: config.cloudinary.apiSecret,
+	});
 
 	const address = await app.listen({port: 0, host: "127.0.0.1"});
 
 	return {
 		async close() {
 			await app.close();
-			await Promise.all([db.destroy(), redis.quit()]);
+			await Promise.all([db.destroy(), redis.quit(), cloudinary.api.delete_all_resources()]);
 			await Promise.all([
 				redisContainer.stop({remove: true, removeVolumes: true}),
 				removeDb(),
@@ -380,6 +418,17 @@ const createTestApp = async () => {
 			});
 		},
 
+		async getAdminProduct(
+			id: Selectable<Product>["id"],
+			options?: RequestOptions,
+		) {
+			return request(`${address}/api/v1/admin/product/${id}`, {
+				...options,
+				method: "GET",
+				headers: buildHeaders(options?.headers),
+			});
+		},
+
 		async getProductFilters(options?: RequestOptions) {
 			return request(`${address}/api/v1/admin/product/filters`, {
 				...options,
@@ -412,6 +461,56 @@ const createTestApp = async () => {
 			options?: RequestOptions,
 		) {
 			return request(`${address}/api/v1/admin/product/${id}`, {
+				...options,
+				method: "DELETE",
+				body: JSON.stringify({}),
+				headers: buildHeaders(options?.headers),
+			});
+		},
+
+		async getAllAdminProductsSku(options?: RequestOptions) {
+			return request(`${address}/api/v1/admin/product/sku`, {
+				...options,
+				method: "GET",
+				headers: buildHeaders(options?.headers),
+			});
+		},
+
+		async getAdminProductSku(
+			id: Selectable<ProductSku>["id"],
+			options?: RequestOptions,
+		) {
+			return request(`${address}/api/v1/admin/product/sku/${id}`, {
+				...options,
+				method: "GET",
+				headers: buildHeaders(options?.headers),
+			});
+		},
+
+		async createProductSku(id: Selectable<Product>["id"], options?: RequestOptions) {
+			return request(`${address}/api/v1/admin/product/${id}/sku`, {
+				...options,
+				method: "POST",
+				headers: buildHeaders(options?.headers, false),
+			});
+		},
+
+		async updateProductSku(
+			id: Selectable<ProductSku>["id"],
+			options?: RequestOptions,
+		) {
+			return request(`${address}/api/v1/admin/product/sku/${id}`, {
+				...options,
+				method: "PATCH",
+				headers: buildHeaders(options?.headers, false),
+			});
+		},
+
+		async removeProductSku(
+			id: Selectable<Product>["id"],
+			options?: RequestOptions,
+		) {
+			return request(`${address}/api/v1/admin/product/sku/${id}`, {
 				...options,
 				method: "DELETE",
 				body: JSON.stringify({}),

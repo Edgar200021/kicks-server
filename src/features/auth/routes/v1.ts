@@ -3,11 +3,11 @@ import type { FastifyRequest } from "fastify";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import z from "zod";
 import { OAUTH_COOKIE_SESSION_PREFIX } from "@/common/const/cookie.js";
-import { ErrorResponseSchema } from "@/common/schemas/error-response.schema.js";
 import {
 	SuccessResponseSchema,
 	ValidationErrorResponseSchema,
 } from "@/common/schemas/index.js";
+import { ErrorResponseSchema } from "@/common/schemas/response.schema.js";
 import { FacebookSignInRequestQuerySchema } from "@/features/auth/schemas/facebook-sign-in.schema.js";
 import {
 	ForgotPasswordRequestSchema,
@@ -96,11 +96,8 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 			},
 		},
 		async (req, reply) => {
-			const { sessionValue } = req.getSession();
-
 			const { sessionId, data } = await fastify.services.authService.signIn(
 				req.body,
-				sessionValue,
 			);
 
 			return reply
@@ -210,7 +207,7 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 		},
 		async (req, reply) => {
 			const { url, cookieState } =
-				fastify.services.authService.genereateOauth2RedirectUrl(
+				fastify.services.authService.generateOauth2RedirectUrl(
 					req.query,
 					"google",
 				);
@@ -276,7 +273,7 @@ export const authRoutesV1: FastifyPluginAsyncZod = async (fastify) => {
 		},
 		async (req, reply) => {
 			const { url, cookieState } =
-				fastify.services.authService.genereateOauth2RedirectUrl(
+				fastify.services.authService.generateOauth2RedirectUrl(
 					req.query,
 					"facebook",
 				);

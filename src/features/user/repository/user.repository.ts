@@ -1,9 +1,14 @@
-import {Insertable, Kysely, Selectable, sql, Updateable} from "kysely";
-import type {DB, Users} from "@/common/types/db.js";
+import {
+	type Insertable,
+	type Kysely,
+	type Selectable,
+	sql,
+	type Updateable,
+} from "kysely";
+import type { DB, Users } from "@/common/types/db.js";
 
 export class UserRepository {
-	constructor(readonly db: Kysely<DB>) {
-	}
+	constructor(readonly db: Kysely<DB>) {}
 
 	async getById(
 		id: Selectable<Users>["id"],
@@ -26,9 +31,7 @@ export class UserRepository {
 			.executeTakeFirst();
 	}
 
-	async create(
-		user: Insertable<Users>,
-	): Promise<Selectable<Users>> {
+	async create(user: Insertable<Users>): Promise<Selectable<Users>> {
 		return await this.db
 			.insertInto("users")
 			.values(user)
@@ -36,12 +39,11 @@ export class UserRepository {
 			.executeTakeFirstOrThrow();
 	}
 
-
 	async updateById(
 		id: Selectable<Users>["id"],
 		user: Updateable<Users>,
 	): Promise<Selectable<Users>["id"]> {
-		const {id: userId} = await this.db
+		const { id: userId } = await this.db
 			.updateTable("users")
 			.set(user)
 			.where("id", "=", id)
@@ -59,14 +61,16 @@ export class UserRepository {
 			.where((eb) =>
 				eb.and([
 					eb("isVerified", "=", false),
-					eb("createdAt", "<", sql<Date>`now
+					eb(
+						"createdAt",
+						"<",
+						sql<Date>`now
               ()
-              - INTERVAL '1 day'`),
+              - INTERVAL '1 day'`,
+					),
 				]),
 			)
 			.returning(["id"])
 			.execute();
 	}
-
-
 }

@@ -47,8 +47,7 @@ export class AuthService {
 		this.generateSession = this.generateSession.bind(this);
 		this.generateSessionAndReturnData =
 			this.generateSessionAndReturnData.bind(this);
-		this.genereateOauth2RedirectUrl =
-			this.genereateOauth2RedirectUrl.bind(this);
+		this.generateOauth2RedirectUrl = this.generateOauth2RedirectUrl.bind(this);
 	}
 
 	protected async generateSession(
@@ -66,7 +65,7 @@ export class AuthService {
 		return id;
 	}
 
-	genereateOauth2RedirectUrl(
+	generateOauth2RedirectUrl(
 		query: OAuth2RedirectUrlRequestQuery,
 		provider: OAuth2Provider,
 	): { url: string; cookieState: string } {

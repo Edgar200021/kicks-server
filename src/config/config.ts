@@ -1,4 +1,5 @@
 import z from "zod";
+import { cloudinaryConfigSchema } from "@/config/cloudinary.js";
 import { databaseConfigSchema } from "./database.config.js";
 import { mailerConfigSchema } from "./mailer.config.js";
 import { rateLimitConfigSchema } from "./rate-limit.config.js";
@@ -49,6 +50,7 @@ const configSchema = z.object({
 	database: databaseConfigSchema,
 	redis: redisConfigSchema,
 	mailer: mailerConfigSchema,
+	cloudinary: cloudinaryConfigSchema,
 	rateLimit: rateLimitConfigSchema,
 });
 
@@ -112,6 +114,13 @@ export const setupConfig = (): Config => {
 			secure: process.env.NODEMAILER_SECURE,
 			user: process.env.NODEMAILER_USER,
 			password: process.env.NODEMAILER_PASSWORD,
+		},
+		cloudinary: {
+			cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+			apiKey: process.env.CLOUDINARY_API_KEY,
+
+			apiSecret: process.env.CLOUDINARY_API_SECRET,
+			folderName: process.env.CLOUDINARY_FOLDER_NAME,
 		},
 		rateLimit: {
 			globalLimit: process.env.RATE_LIMIT_GLOBAL,

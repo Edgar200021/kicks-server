@@ -1,17 +1,18 @@
-import {Kysely, OperandExpression, Selectable, sql, SqlBool, Updateable} from "kysely";
-import type {Brand, DB} from "@/common/types/db.js";
-import type {
-	GetAllBrandsRequestQuery
-} from "@/features/admin/brand/schemas/get-all-brands.schema.js";
+import {
+	type Kysely,
+	type OperandExpression,
+	type Selectable,
+	type SqlBool,
+	sql,
+	type Updateable,
+} from "kysely";
+import type { Brand, DB } from "@/common/types/db.js";
+import type { GetAllBrandsRequestQuery } from "@/features/admin/brand/schemas/get-all-brands.schema.js";
 
 export class AdminBrandRepository {
+	constructor(readonly db: Kysely<DB>) {}
 
-	constructor(readonly db: Kysely<DB>) {
-	}
-
-	async getAll(
-		query: GetAllBrandsRequestQuery,
-	): Promise<Selectable<Brand>[]> {
+	async getAll(query: GetAllBrandsRequestQuery): Promise<Selectable<Brand>[]> {
 		return await this.db
 			.selectFrom("brand")
 			.selectAll()
@@ -46,10 +47,7 @@ export class AdminBrandRepository {
 			.executeTakeFirst();
 	}
 
-
-	async create(
-		name: Selectable<Brand>["name"],
-	): Promise<Selectable<Brand>> {
+	async create(name: Selectable<Brand>["name"]): Promise<Selectable<Brand>> {
 		return await this.db
 			.insertInto("brand")
 			.values({
@@ -58,7 +56,6 @@ export class AdminBrandRepository {
 			.returningAll()
 			.executeTakeFirstOrThrow();
 	}
-
 
 	async remove(
 		id: Selectable<Brand>["id"],
@@ -89,6 +86,4 @@ export class AdminBrandRepository {
 
 		return res?.id;
 	}
-
-
 }

@@ -1,20 +1,17 @@
-import type {AdminUserRepository} from "@/features/admin/user/repository/admin-user.repository.js";
+import { httpErrors } from "@fastify/sensible";
+import type { AdminUserRepository } from "@/features/admin/user/repository/admin-user.repository.js";
+import type { BlockToggleRequestParams } from "@/features/admin/user/schemas/block-toggle.schema.js";
 import type {
 	GetAllUsersRequestQuery,
-	GetAllUsersResponse
+	GetAllUsersResponse,
 } from "@/features/admin/user/schemas/get-all-users.schema.js";
-import type {BlockToggleRequestParams} from "@/features/admin/user/schemas/block-toggle.schema.js";
-import {httpErrors} from "@fastify/sensible";
-import type {RemoveUserRequestParams} from "@/features/admin/user/schemas/remove-user.schema.js";
+import type { RemoveUserRequestParams } from "@/features/admin/user/schemas/remove-user.schema.js";
 
 export class AdminUserService {
-	constructor(protected readonly userRepository: AdminUserRepository) {
-	}
+	constructor(protected readonly userRepository: AdminUserRepository) {}
 
-	async getAll(
-		query: GetAllUsersRequestQuery,
-	): Promise<GetAllUsersResponse> {
-		const {users, count} = await this.userRepository.getAll(query);
+	async getAll(query: GetAllUsersRequestQuery): Promise<GetAllUsersResponse> {
+		const { users, count } = await this.userRepository.getAll(query);
 
 		const pageCount = Math.ceil(count / query.limit);
 
@@ -28,18 +25,14 @@ export class AdminUserService {
 		};
 	}
 
-	async blockToggle(
-		params: BlockToggleRequestParams,
-	) {
+	async blockToggle(params: BlockToggleRequestParams) {
 		const userId = await this.userRepository.blockToggle(params.id);
 		if (!userId) {
 			throw httpErrors.notFound(`User with id ${params.id} doesn't exist`);
 		}
 	}
 
-	async remove(
-		params: RemoveUserRequestParams,
-	) {
+	async remove(params: RemoveUserRequestParams) {
 		const user = await this.userRepository.getById(params.id);
 		if (!user) {
 			throw httpErrors.notFound(`User with id ${params.id} not found`);
@@ -66,6 +59,4 @@ export class AdminUserService {
 
 		await this.userRepository.remove(user.id);
 	}
-
-
 }

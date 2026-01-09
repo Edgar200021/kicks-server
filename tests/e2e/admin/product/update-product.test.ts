@@ -1,15 +1,7 @@
 import {faker} from "@faker-js/faker";
-import type {Selectable} from "kysely";
 import {Headers} from "undici";
 import {describe, expect, it} from "vitest";
-import {
-	type Brand,
-	type Category,
-	type Product,
-	ProductGender,
-	type UserGender,
-	UserRole,
-} from "../../../../src/common/types/db.js";
+import {type UserGender, UserRole,} from "../../../../src/common/types/db.js";
 import {
 	GET_ALL_ADMIN_PRODUCTS_MAX_LIMIT,
 	PRODUCT_DESCRIPTION_MAX_LENGTH,
@@ -18,6 +10,7 @@ import {
 	PRODUCT_TITLE_MIN_LENGTH,
 } from "../../../../src/features/admin/product/const/zod.js";
 import {generatePassword, type TestApp, withTestApp,} from "../../../testApp.js";
+import {AdminProduct} from "../../../../src/features/admin/product/types/db.js";
 
 describe("Admin", () => {
 	const signUpData = {
@@ -46,10 +39,7 @@ describe("Admin", () => {
 			products: (
 				(await res.body.json()) as {
 					data: {
-						products: (Selectable<Product> & {
-							category: Pick<Selectable<Category>, "id" | "name"> | null;
-							brand: Pick<Selectable<Brand>, "id" | "name"> | null;
-						})[];
+						products: AdminProduct[];
 					};
 				}
 			).data.products,
@@ -88,6 +78,7 @@ describe("Admin", () => {
 					length: PRODUCT_DESCRIPTION_MAX_LENGTH,
 				});
 
+
 				const res = await app.updateProduct(products[0].id, {
 					body: JSON.stringify({
 						title: newTitle,
@@ -100,35 +91,23 @@ describe("Admin", () => {
 
 				expect(res.statusCode).toBe(200);
 
-				const {
-					data: {id},
-				} = (await res.body.json()) as { data: { id: string } };
-
 				const dbProduct = await app.db
 					.selectFrom("product")
 					.select(["id", "title", "description"])
-					.where("id", "=", id)
-					.executeTakeFirstOrThrow();
+					.where("id", "=", products[0].id)
+					.executeTakeFirst();
 
 				expect(dbProduct).toBeDefined();
-				expect(dbProduct.title).not.equal(products[0].title);
-				expect(dbProduct.title).equal(newTitle);
-				expect(dbProduct.description).not.equal(products[0].description);
-				expect(dbProduct.description).equal(newDescription);
+				expect(dbProduct!.title).not.equal(products[0].title);
+				expect(dbProduct!.title).equal(newTitle);
+				expect(dbProduct!.description).not.equal(products[0].description);
+				expect(dbProduct!.description).equal(newDescription);
 			});
 		});
 
 		it("Should return 400 status code when data is invalid", async () => {
 			await withTestApp(async (app) => {
 				const {session, products} = await setup(app);
-
-				const product = {
-					title: faker.string.alpha({length: PRODUCT_TITLE_MAX_LENGTH}),
-					description: faker.string.alpha({
-						length: PRODUCT_DESCRIPTION_MAX_LENGTH,
-					}),
-					gender: ProductGender.Men,
-				};
 
 				const testCases = [
 					{
@@ -169,14 +148,13 @@ describe("Admin", () => {
 					},
 					{
 						name: "categoryId is not uuid",
-						data: {...product, categoryId: "invalid id"},
+						data: {categoryId: "invalid id"},
 					},
 					{
 						name: "brandId is not uuid",
 						data: {brandId: "invalid id"},
 					},
 				];
-
 
 				for (const {name, data} of testCases) {
 					const res = await app.updateProduct(products[0].id, {
@@ -188,7 +166,6 @@ describe("Admin", () => {
 
 					expect(res.statusCode, `${name} → wrong status`).toBe(400);
 				}
-
 			});
 		});
 
@@ -210,7 +187,7 @@ describe("Admin", () => {
 						)
 						.executeTakeFirst();
 
-					if (!sameProduct) continue
+					if (!sameProduct) continue;
 
 					const res = await app.updateProduct(product.id, {
 						body: JSON.stringify({
@@ -222,7 +199,7 @@ describe("Admin", () => {
 					});
 
 					expect(res.statusCode).toBe(400);
-					break
+					break;
 				}
 			});
 		});
@@ -281,10 +258,7 @@ describe("Admin", () => {
 						body: JSON.stringify(data),
 					});
 
-					expect(
-						res.statusCode,
-						`${name} → wrong status`
-					).toBe(404);
+					expect(res.statusCode, `${name} → wrong status`).toBe(404);
 				}
 			});
 		});

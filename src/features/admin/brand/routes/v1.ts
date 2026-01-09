@@ -1,8 +1,10 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import z from "zod";
-import { ErrorResponseSchema } from "@/common/schemas/error-response.schema.js";
-import { SuccessResponseSchema } from "@/common/schemas/success-response.schema.js";
-import { ValidationErrorResponseSchema } from "@/common/schemas/validation-error-response.schema.js";
+import {
+	ErrorResponseSchema,
+	SuccessResponseSchema,
+	ValidationErrorResponseSchema,
+} from "@/common/schemas/index.js";
 import {
 	CreateBrandRequestSchema,
 	CreateBrandResponseSchema,

@@ -1,13 +1,16 @@
-import {Kysely, OperandExpression, Selectable, sql, SqlBool, Updateable} from "kysely";
-import type {Category, DB} from "@/common/types/db.js";
 import {
-	GetAllCategoriesRequestQuery
-} from "@/features/admin/category/schemas/get-all-categories.schema.js";
+	type Kysely,
+	type OperandExpression,
+	type Selectable,
+	type SqlBool,
+	sql,
+	type Updateable,
+} from "kysely";
+import type { Category, DB } from "@/common/types/db.js";
+import type { GetAllCategoriesRequestQuery } from "@/features/admin/category/schemas/get-all-categories.schema.js";
 
 export class AdminCategoryRepository {
-
-	constructor(readonly db: Kysely<DB>) {
-	}
+	constructor(readonly db: Kysely<DB>) {}
 
 	async getAll(
 		query: GetAllCategoriesRequestQuery,
@@ -58,7 +61,6 @@ export class AdminCategoryRepository {
 			.executeTakeFirstOrThrow();
 	}
 
-
 	async remove(
 		id: Selectable<Category>["id"],
 	): Promise<Selectable<Category>["id"] | undefined> {
@@ -88,5 +90,4 @@ export class AdminCategoryRepository {
 
 		return res?.id;
 	}
-
 }

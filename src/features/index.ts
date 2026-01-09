@@ -4,8 +4,10 @@ import type { Kysely } from "kysely";
 import type { Transporter } from "nodemailer";
 import type { ToadScheduler } from "toad-scheduler";
 import { EmailService } from "@/common/services/email.service.js";
+import { FileUploaderService } from "@/common/services/file-uploader.service.js";
 import { OAuth2Service } from "@/common/services/oauth2.service.js";
 import type { DB } from "@/common/types/db.js";
+import type { CloudinaryConfig } from "@/config/cloudinary.js";
 import type { ApplicationConfig } from "@/config/config.js";
 import { AdminBrandRepository } from "@/features/admin/brand/repository/admin-brand.repository.js";
 import { AdminBrandService } from "@/features/admin/brand/service/admin-brand.service.js";
@@ -36,13 +38,15 @@ export const setupServices = ({
 	db,
 	transporter,
 	redis,
-	config,
+	appConfig,
+	cloudinaryConfig,
 	scheduler,
 }: {
 	db: Kysely<DB>;
 	transporter: Transporter;
 	redis: Redis;
-	config: ApplicationConfig;
+	appConfig: ApplicationConfig;
+	cloudinaryConfig: CloudinaryConfig;
 	scheduler: ToadScheduler;
 }): FastifyInstance["services"] => {
 	const userRepository = new UserRepository(db);
@@ -52,8 +56,9 @@ export const setupServices = ({
 	const adminBrandRepository = new AdminBrandRepository(db);
 	const adminProductRepository = new AdminProductRepository(db);
 
-	const emailService = new EmailService(transporter, config);
-	const oauth2Service = new OAuth2Service(config);
+	const emailService = new EmailService(transporter, appConfig);
+	const oauth2Service = new OAuth2Service(appConfig);
+	const fileUploader = new FileUploaderService(cloudinaryConfig);
 
 	return {
 		authService: new AuthService(
@@ -61,12 +66,15 @@ export const setupServices = ({
 			emailService,
 			oauth2Service,
 			redis,
-			config,
+			appConfig,
 		),
 		userService: new UserService(userRepository, scheduler),
 		adminUserService: new AdminUserService(adminUserRepository),
 		adminCategoryService: new AdminCategoryService(adminCategoryRepository),
 		adminBrandService: new AdminBrandService(adminBrandRepository),
-		adminProductService: new AdminProductService(adminProductRepository),
+		adminProductService: new AdminProductService(
+			adminProductRepository,
+			fileUploader,
+		),
 	};
 };

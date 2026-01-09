@@ -101,7 +101,8 @@ export const buildApp = async (config: Config) => {
 		redis: redisClient,
 		db: dbClient,
 		transporter: nodemailerClient,
-		config: config.application,
+		appConfig: config.application,
+		cloudinaryConfig: config.cloudinary,
 		scheduler: app.scheduler,
 	});
 

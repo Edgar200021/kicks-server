@@ -1,12 +1,11 @@
-import {Kysely, Selectable, sql} from "kysely";
-import type {DB, Users} from "@/common/types/db.js";
-import {getAll} from "@/features/admin/user/repository/get-all.js";
+import { type Kysely, type Selectable, sql } from "kysely";
+import type { DB, Users } from "@/common/types/db.js";
+import { getAll } from "@/features/admin/user/repository/get-all.js";
 
 export class AdminUserRepository {
 	getAll = getAll;
 
-	constructor(readonly db: Kysely<DB>) {
-	}
+	constructor(readonly db: Kysely<DB>) {}
 
 	async getById(
 		id: Selectable<Users>["id"],
@@ -44,6 +43,4 @@ export class AdminUserRepository {
 
 		return user?.id;
 	}
-
-
 }

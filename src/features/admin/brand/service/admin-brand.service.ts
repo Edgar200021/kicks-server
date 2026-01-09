@@ -1,30 +1,29 @@
+import {httpErrors} from "@fastify/sensible";
+import {DUPLICATE_DETAIL} from "@/common/const/database.js";
+import {isDatabaseError} from "@/common/types/database.js";
 import type {
 	AdminBrandRepository
 } from "@/features/admin/brand/repository/admin-brand.repository.js";
 import type {
-	GetAllBrandsRequestQuery,
-	GetAllBrandsResponse
-} from "@/features/admin/brand/schemas/get-all-brands.schema.js";
-import type {
 	CreateBrandRequest,
-	CreateBrandResponse
+	CreateBrandResponse,
 } from "@/features/admin/brand/schemas/create-brand.schema.js";
-import {isDatabaseError} from "@/common/types/database.js";
-import {DUPLICATE_DETAIL} from "@/common/const/database.js";
-import {httpErrors} from "@fastify/sensible";
+import type {
+	GetAllBrandsRequestQuery,
+	GetAllBrandsResponse,
+} from "@/features/admin/brand/schemas/get-all-brands.schema.js";
 import type {RemoveBrandRequestParams} from "@/features/admin/brand/schemas/remove-brand.schema.js";
 import type {
 	UpdateBrandRequest,
-	UpdateBrandRequestParams
+	UpdateBrandRequestParams,
 } from "@/features/admin/brand/schemas/update-brand.schema.js";
+import {getIsoString} from "@/common/utils/index.js";
 
 export class AdminBrandService {
 	constructor(protected readonly brandRepository: AdminBrandRepository) {
 	}
 
-	async getAll(
-		query: GetAllBrandsRequestQuery,
-	): Promise<GetAllBrandsResponse> {
+	async getAll(query: GetAllBrandsRequestQuery): Promise<GetAllBrandsResponse> {
 		const brands = await this.brandRepository.getAll(query);
 
 		return brands.map((b) => ({
@@ -34,9 +33,7 @@ export class AdminBrandService {
 		}));
 	}
 
-	async create(
-		data: CreateBrandRequest,
-	): Promise<CreateBrandResponse> {
+	async create(data: CreateBrandRequest): Promise<CreateBrandResponse> {
 		try {
 			const newBrand = await this.brandRepository.create(data.name);
 
@@ -55,15 +52,11 @@ export class AdminBrandService {
 		}
 	}
 
-
-	async update(
-		data: UpdateBrandRequest,
-		params: UpdateBrandRequestParams,
-	) {
+	async update(data: UpdateBrandRequest, params: UpdateBrandRequestParams) {
 		try {
 			const brandId = await this.brandRepository.updateById(params.id, {
 				...data,
-				updatedAt: new Date(),
+				updatedAt: getIsoString(),
 			});
 
 			if (!brandId) {
@@ -79,9 +72,7 @@ export class AdminBrandService {
 		}
 	}
 
-	async remove(
-		params: RemoveBrandRequestParams,
-	) {
+	async remove(params: RemoveBrandRequestParams) {
 		const brandId = await this.brandRepository.remove(params.id);
 
 		if (!brandId) {

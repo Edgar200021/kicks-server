@@ -1,5 +1,5 @@
 import z from "zod";
-import {IdParamsSchema} from "@/common/schemas/id-param.schema.js";
+import { IdParamsSchema } from "@/common/schemas/id-param.schema.js";
 
 export const RemoveProductRequestParamsSchema = IdParamsSchema;
 

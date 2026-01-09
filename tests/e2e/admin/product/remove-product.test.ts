@@ -1,16 +1,10 @@
 import {faker} from "@faker-js/faker";
-import type {Selectable} from "kysely";
 import {Headers} from "undici";
 import {describe, expect, it} from "vitest";
-import {
-	type Brand,
-	type Category,
-	type Product,
-	type UserGender,
-	UserRole,
-} from "../../../../src/common/types/db.js";
+import {type UserGender, UserRole,} from "../../../../src/common/types/db.js";
 
 import {generatePassword, type TestApp, withTestApp,} from "../../../testApp.js";
+import {AdminProduct} from "../../../../src/features/admin/product/types/db.js";
 
 describe("Admin", () => {
 	const signUpData = {
@@ -39,10 +33,7 @@ describe("Admin", () => {
 			product: (
 				(await res.body.json()) as {
 					data: {
-						products: (Selectable<Product> & {
-							category: Pick<Selectable<Category>, "id" | "name"> | null;
-							brand: Pick<Selectable<Brand>, "id" | "name"> | null;
-						})[];
+						products: AdminProduct[];
 					};
 				}
 			).data.products[0],
@@ -81,7 +72,7 @@ describe("Admin", () => {
 					.where("id", "=", product.id)
 					.executeTakeFirstOrThrow();
 
-				expect(dbProduct.isDeleted).toBe(!product.isDeleted)
+				expect(dbProduct.isDeleted).toBe(!product.isDeleted);
 			});
 		});
 

@@ -1,10 +1,18 @@
-import {faker} from "@faker-js/faker";
-import type {Selectable} from "kysely";
-import {Headers} from "undici";
-import {describe, expect, it} from "vitest";
-import {type Category, type UserGender, UserRole,} from "../../../../src/common/types/db.js";
+import { faker } from "@faker-js/faker";
+import type { Selectable } from "kysely";
+import { Headers } from "undici";
+import { describe, expect, it } from "vitest";
+import {
+	type Category,
+	type UserGender,
+	UserRole,
+} from "../../../../src/common/types/db.js";
 
-import {generatePassword, type TestApp, withTestApp,} from "../../../testApp.js";
+import {
+	generatePassword,
+	type TestApp,
+	withTestApp,
+} from "../../../testApp.js";
 
 describe("Admin", () => {
 	const signUpData = {
@@ -39,7 +47,7 @@ describe("Admin", () => {
 	describe("Remove category", () => {
 		it("Should return 200 status code when request is successful", async () => {
 			await withTestApp(async (app) => {
-				const {session, categories} = await setup(app);
+				const { session, categories } = await setup(app);
 
 				const res = await app.removeCategory(categories[0].id, {
 					headers: new Headers({
@@ -53,7 +61,7 @@ describe("Admin", () => {
 
 		it("Should be deleted from database when request is successful", async () => {
 			await withTestApp(async (app) => {
-				const {session, categories} = await setup(app);
+				const { session, categories } = await setup(app);
 
 				const res = await app.removeCategory(categories[0].id, {
 					headers: new Headers({
@@ -88,7 +96,7 @@ describe("Admin", () => {
 				];
 
 				await Promise.all(
-					testCases.map(async ({name, id}) => {
+					testCases.map(async ({ name, id }) => {
 						const res = await app.removeCategory(id as string, {
 							headers: new Headers({
 								Cookie: session,

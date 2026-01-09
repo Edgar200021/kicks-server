@@ -1,24 +1,25 @@
+import {httpErrors} from "@fastify/sensible";
+import {DUPLICATE_DETAIL} from "@/common/const/database.js";
+import {isDatabaseError} from "@/common/types/database.js";
 import type {
 	AdminCategoryRepository
 } from "@/features/admin/category/repository/admin-category.repository.js";
-import {isDatabaseError} from "@/common/types/database.js";
-import {DUPLICATE_DETAIL} from "@/common/const/database.js";
-import {httpErrors} from "@fastify/sensible";
-import {
-	GetAllCategoriesRequestQuery,
-	GetAllCategoriesResponse
-} from "@/features/admin/category/schemas/get-all-categories.schema.js";
-import {
+import type {
 	CreateCategoryRequest,
-	CreateCategoryResponse
+	CreateCategoryResponse,
 } from "@/features/admin/category/schemas/create-category.schema.js";
-import {
-	UpdateCategoryRequest,
-	UpdateCategoryRequestParams
-} from "@/features/admin/category/schemas/update-category.schema.js";
-import {
+import type {
+	GetAllCategoriesRequestQuery,
+	GetAllCategoriesResponse,
+} from "@/features/admin/category/schemas/get-all-categories.schema.js";
+import type {
 	RemoveCategoryRequestParams
 } from "@/features/admin/category/schemas/remove-category.schema.js";
+import type {
+	UpdateCategoryRequest,
+	UpdateCategoryRequestParams,
+} from "@/features/admin/category/schemas/update-category.schema.js";
+import {getIsoString} from "@/common/utils/index.js";
 
 export class AdminCategoryService {
 	constructor(protected readonly categoryRepository: AdminCategoryRepository) {
@@ -36,9 +37,7 @@ export class AdminCategoryService {
 		}));
 	}
 
-	async create(
-		data: CreateCategoryRequest,
-	): Promise<CreateCategoryResponse> {
+	async create(data: CreateCategoryRequest): Promise<CreateCategoryResponse> {
 		try {
 			const newCategory = await this.categoryRepository.create(data.name);
 
@@ -57,7 +56,6 @@ export class AdminCategoryService {
 		}
 	}
 
-
 	async update(
 		data: UpdateCategoryRequest,
 		params: UpdateCategoryRequestParams,
@@ -65,7 +63,7 @@ export class AdminCategoryService {
 		try {
 			const categoryId = await this.categoryRepository.updateById(params.id, {
 				...data,
-				updatedAt: new Date(),
+				updatedAt: getIsoString(),
 			});
 
 			if (!categoryId) {
@@ -81,9 +79,7 @@ export class AdminCategoryService {
 		}
 	}
 
-	async remove(
-		params: RemoveCategoryRequestParams,
-	) {
+	async remove(params: RemoveCategoryRequestParams) {
 		const brandId = await this.categoryRepository.remove(params.id);
 
 		if (!brandId) {

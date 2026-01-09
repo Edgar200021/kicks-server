@@ -1,15 +1,13 @@
-import { faker } from "@faker-js/faker";
-import { Headers } from "undici";
-import { describe, expect, it } from "vitest";
-import { type UserGender, UserRole } from "../../../../src/common/types/db.js";
+import {faker} from "@faker-js/faker";
+import {Headers} from "undici";
+import {describe, expect, it} from "vitest";
+import {type UserGender, UserRole} from "../../../../src/common/types/db.js";
 import {
-	GET_ALL_ADMIN_PRODUCTS_BRAND_MAX_LENGTH,
-	GET_ALL_ADMIN_PRODUCTS_CATEGORY_MAX_LENGTH,
 	GET_ALL_ADMIN_PRODUCTS_MAX_LIMIT,
 	GET_ALL_ADMIN_PRODUCTS_SEARCH_MAX_LENGTH,
 	GET_ALL_ADMIN_PRODUCTS_TAGS_MAX_LENGTH,
 } from "../../../../src/features/admin/product/const/zod.js";
-import { generatePassword, withTestApp } from "../../../testApp.js";
+import {generatePassword, withTestApp} from "../../../testApp.js";
 
 describe("Admin", () => {
 	const signUpData = {
@@ -135,31 +133,15 @@ describe("Admin", () => {
 						},
 					},
 					{
-						name: "empty category",
+						name: "empty categoryId",
 						data: {
-							category: "",
+							categoryId: "",
 						},
 					},
 					{
-						name: "category is too long",
+						name: "empty brandId",
 						data: {
-							category: faker.string.alpha({
-								length: GET_ALL_ADMIN_PRODUCTS_CATEGORY_MAX_LENGTH + 1,
-							}),
-						},
-					},
-					{
-						name: "empty brand",
-						data: {
-							brand: "",
-						},
-					},
-					{
-						name: "brand is too long",
-						data: {
-							brand: faker.string.alpha({
-								length: GET_ALL_ADMIN_PRODUCTS_BRAND_MAX_LENGTH + 1,
-							}),
+							brandId: "",
 						},
 					},
 					{
@@ -171,7 +153,7 @@ describe("Admin", () => {
 					{
 						name: "invalid endDate",
 						data: {
-							startDate: "invalid date",
+							endDate: "invalid date",
 						},
 					},
 					{
@@ -183,18 +165,16 @@ describe("Admin", () => {
 					},
 				];
 
-				await Promise.all(
-					testCases.map(async ({ name, data }) => {
-						const res = await app.getAllAdminProducts({
-							headers: new Headers({
-								Cookie: session,
-							}),
-							query: data,
-						});
+				for (const {name, data} of testCases) {
+					const res = await app.getAllAdminProducts({
+						headers: new Headers({
+							Cookie: session,
+						}),
+						query: data,
+					});
 
-						expect(res.statusCode, `${name} → wrong status`).toBe(400);
-					}),
-				);
+					expect(res.statusCode, `${name} → wrong status`).toBe(400);
+				}
 			});
 		});
 
